@@ -177,7 +177,7 @@ As correções estão prontas para virar PR.
 
 ## Sobre
 
-Sou brasileiro, 23 anos, estudante de engenharia de software, de Jundiaí (SP).
+Sou brasileiro, 23 anos, estudante de engenharia de software.
 Isso aqui é projeto de tempo livre — nasceu da curiosidade de entender como uma
 recompilação estática funciona de verdade, e virou isso.
 
