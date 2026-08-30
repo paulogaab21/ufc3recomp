@@ -1,0 +1,33 @@
+# ---------------------------------------------------------------------------
+# NUNCA COMMITAR CONTEUDO DO JOGO
+#
+# Tudo abaixo e' derivado do disco do UFC Undisputed 3. O executavel original,
+# o basefile descriptografado, o desmontado e o C++ gerado a partir dele sao
+# todos obra protegida. Este repositorio distribui apenas codigo e configuracao.
+# ---------------------------------------------------------------------------
+assets/
+work/
+generated/
+*.xex
+*.xexp
+*.bin
+*.dis
+*.iso
+
+# Build
+out/
+build/
+CMakeUserPresets.json
+.cache/
+compile_commands.json
+
+# Logs
+*.log
+
+# Editor / SO
+.vs/
+.vscode/
+.idea/
+*.user
+Thumbs.db
+desktop.ini
