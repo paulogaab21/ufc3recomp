@@ -1,6 +1,6 @@
 # UFC 3 Recomp
 
-Recompilação estática de **UFC Undisputed 3** (Xbox 360) para PC, usando o
+Recompilação  de **UFC Undisputed 3** (Xbox 360) para PC, usando o
 [ReXGlue SDK](https://github.com/rexglue/rexglue-sdk).
 
 Não é emulação. O executável do jogo é traduzido de PowerPC para C++ e depois
