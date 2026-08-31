@@ -9,9 +9,24 @@ direto no processador, sem interpretar nada em tempo real.
 
 ---
 
+## Gameplay — 2K / 144 FPS
+
+**UFC Undisputed 3 já está jogável no PC em 2K a 144 FPS por meio desta recompilação.**
+
+[![UFC Undisputed 3 — jogável em 2K a 144 FPS](https://i.ytimg.com/vi/hUpWKWqRkJ8/maxresdefault.jpg)](https://www.youtube.com/watch?v=5cQYiwqAFsc)
+
+*Imagem de UFC Undisputed 3 — clique para assistir ao vídeo do projeto.*
+
+[▶ Assista ao gameplay no YouTube — 2K a 144 FPS](https://www.youtube.com/watch?v=5cQYiwqAFsc)
+
+A próxima meta do projeto é atingir **2K a 244 FPS**, mantendo estabilidade e
+jogabilidade.
+
+---
+
 ## Em que pé está
 
-Honestamente: **o jogo dá boot e executa código, mas ainda não é jogável.**
+**O jogo dá boot, renderiza e já está jogável em 2K a 144 FPS.**
 
 O que já funciona:
 
@@ -23,16 +38,11 @@ O que já funciona:
 - Registra **66.157 funções recompiladas** na tabela de funções
 - Carrega a imagem do XEX e resolve os imports do kernel do Xbox 360 —
   101 do `xam`, 184 do `xboxkrnl`
-- Chega em `Module prepared` e começa a executar o código do jogo
+- Chega ao gameplay com imagem, áudio e entrada funcionando
+- Roda em 2K a 144 FPS no vídeo publicado
 
-Onde para hoje:
-
-```
-[FATAL] Call to invalid or unregistered function at guest address 0x831820A8
-```
-
-Uma função que o recompilador não descobriu. Já identificada e corrigida; o
-trabalho agora é encontrar as próximas da mesma classe (mais sobre isso abaixo).
+O trabalho agora está concentrado em aumentar a estabilidade, cobrir caminhos
+menos comuns e melhorar o desempenho.
 
 ---
 
@@ -167,10 +177,13 @@ As correções estão prontas para virar PR.
 - [x] Traduzir o XEX para C++
 - [x] Compilar um executável nativo
 - [x] Fazer o runtime subir e carregar o jogo
-- [ ] Passar dos inicializadores estáticos não descobertos
+- [x] Passar dos inicializadores estáticos iniciais
 - [ ] Melhorar o detector de funções órfãs (seguir fluxo de controle)
 - [ ] Resolver as jump tables (`[[switch_tables]]`)
-- [ ] Chegar na primeira imagem renderizada
+- [x] Chegar na primeira imagem renderizada
+- [x] Chegar ao gameplay jogável
+- [x] Rodar em 2K a 144 FPS
+- [ ] Atingir 2K a 244 FPS com estabilidade
 - [ ] Abrir os PRs no ReXGlue SDK
 
 ---
