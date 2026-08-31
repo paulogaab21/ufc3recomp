@@ -31,3 +31,6 @@ compile_commands.json
 *.user
 Thumbs.db
 desktop.ini
+
+# Saves, perfil e cache de shader do jogador. Dados pessoais, nunca commitar.
+userdata/

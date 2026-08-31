@@ -1,0 +1,10 @@
+As fontes embutidas neste launcher sao da familia Fira Sans, criada por
+Carrois Apostrophe / Erik Spiekermann, distribuida sob a SIL Open Font
+License 1.1 (https://scripts.sil.org/OFL). A OFL permite uso, modificacao
+e redistribuicao, inclusive embutida em um programa.
+
+  FiraSans-Regular.ttf
+  FiraSansCondensed-Regular.ttf
+  FiraSansCondensed-Bold.ttf
+
+Texto da licenca: https://github.com/mozilla/Fira/blob/master/LICENSE

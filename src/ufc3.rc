@@ -1,0 +1,30 @@
+// Recursos do Windows para ufc3.exe.
+//
+// O icone de menor ID e' o que o Windows usa na barra de tarefas, no
+// Alt+Tab e na propria janela -- o SDK nao define nenhum em tempo de
+// execucao, entao este e' o unico lugar que precisa saber disso.
+
+1 ICON "ufc3.ico"
+
+1 VERSIONINFO
+FILEVERSION     1,0,0,0
+PRODUCTVERSION  1,0,0,0
+FILEOS          0x40004L
+FILETYPE        0x1L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "FileDescription", "UFC Undisputed 3 (recompilacao estatica)"
+            VALUE "ProductName",     "ufc3Recomp"
+            VALUE "FileVersion",     "1.0.0.0"
+            VALUE "ProductVersion",  "1.0.0.0"
+            VALUE "Comments",        "github.com/paulogaab21/ufc3recomp"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END

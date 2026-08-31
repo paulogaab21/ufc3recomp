@@ -1,0 +1,641 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="UFC 3 Recomp" Height="700" Width="1120"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        FontFamily="{DynamicResource FonteTexto}" UseLayoutRounding="True">
+
+  <Window.Resources>
+    <!-- ===================== paleta =====================
+         Tirada da propria arte: preto do fundo, cinza frio do texto,
+         o vermelho do UFC e o dourado do calcao do Anderson Silva.  -->
+    <SolidColorBrush x:Key="Realce"     Color="#E03A2F"/>
+    <SolidColorBrush x:Key="Ouro"       Color="#D8B25A"/>
+    <SolidColorBrush x:Key="Texto"      Color="#F1F2F4"/>
+    <SolidColorBrush x:Key="TextoFraco" Color="#9DA2AA"/>
+    <SolidColorBrush x:Key="TextoTenue" Color="#6B7079"/>
+    <SolidColorBrush x:Key="Bom"        Color="#8FD16A"/>
+
+    <!-- ===================== tipografia ===================== -->
+    <Style x:Key="Sobrancelha" TargetType="TextBlock">
+      <Setter Property="FontFamily" Value="{DynamicResource FonteCond}"/>
+      <Setter Property="FontSize" Value="19"/>
+      <Setter Property="Foreground" Value="{StaticResource Realce}"/>
+    </Style>
+    <Style x:Key="Titulo" TargetType="TextBlock">
+      <Setter Property="Foreground" Value="#F5F6F8"/>
+      <Setter Property="FontFamily" Value="{DynamicResource FonteCondNegrito}"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="Margin" Value="0,18,0,8"/>
+    </Style>
+    <Style x:Key="Rotulo" TargetType="TextBlock">
+      <Setter Property="Foreground" Value="{StaticResource TextoFraco}"/>
+      <Setter Property="FontSize" Value="12.5"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style x:Key="Dica" TargetType="TextBlock">
+      <Setter Property="Foreground" Value="{StaticResource TextoTenue}"/>
+      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+    <!-- texto sobre a arte: precisa de sombra para nao sumir -->
+    <Style x:Key="Canto" TargetType="TextBlock">
+      <Setter Property="Foreground" Value="{StaticResource TextoFraco}"/>
+      <Setter Property="FontSize" Value="12.5"/>
+      <Setter Property="Effect">
+        <Setter.Value>
+          <DropShadowEffect BlurRadius="7" ShadowDepth="1" Direction="270"
+                            Opacity="0.9" Color="#000000"/>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- ===================== controles de formulario ===================== -->
+    <Style TargetType="CheckBox">
+      <Setter Property="Foreground" Value="{StaticResource Texto}"/>
+      <Setter Property="FontSize" Value="12.5"/>
+      <Setter Property="Margin" Value="0,6,0,6"/>
+    </Style>
+
+    <Style x:Key="CaixaTexto" TargetType="TextBox">
+      <Setter Property="Height" Value="32"/>
+      <Setter Property="FontSize" Value="12.5"/>
+      <Setter Property="Background" Value="#161A20"/>
+      <Setter Property="Foreground" Value="{StaticResource Texto}"/>
+      <Setter Property="BorderBrush" Value="#33383F"/>
+      <Setter Property="Padding" Value="9,0,9,0"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="CaretBrush" Value="{StaticResource Realce}"/>
+    </Style>
+
+    <!-- ComboBox escuro: o padrao do Windows destoa demais do resto -->
+    <Style TargetType="ComboBox">
+      <Setter Property="Height" Value="32"/>
+      <Setter Property="FontSize" Value="12.5"/>
+      <Setter Property="Foreground" Value="{StaticResource Texto}"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ComboBox">
+            <Grid>
+              <ToggleButton Focusable="False" ClickMode="Press"
+                            IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                <ToggleButton.Template>
+                  <ControlTemplate TargetType="ToggleButton">
+                    <Border x:Name="cx" Background="#161A20" BorderBrush="#33383F"
+                            BorderThickness="1" CornerRadius="3">
+                      <Path HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Margin="0,0,11,0" Fill="#9DA2AA" Data="M 0 0 L 9 0 L 4.5 5.5 Z"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                      <Trigger Property="IsMouseOver" Value="True">
+                        <Setter TargetName="cx" Property="BorderBrush" Value="#6A7480"/>
+                      </Trigger>
+                    </ControlTemplate.Triggers>
+                  </ControlTemplate>
+                </ToggleButton.Template>
+              </ToggleButton>
+              <ContentPresenter Margin="10,0,30,0" VerticalAlignment="Center" IsHitTestVisible="False"
+                                Content="{TemplateBinding SelectionBoxItem}"
+                                ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"/>
+              <Popup IsOpen="{TemplateBinding IsDropDownOpen}" Placement="Bottom"
+                     AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
+                <Border Background="#161A20" BorderBrush="#3A4048" BorderThickness="1"
+                        CornerRadius="3" MinWidth="{TemplateBinding ActualWidth}"
+                        MaxHeight="{TemplateBinding MaxDropDownHeight}" Margin="0,3,0,0">
+                  <Border.Effect>
+                    <DropShadowEffect BlurRadius="16" ShadowDepth="3" Direction="270" Opacity="0.6"/>
+                  </Border.Effect>
+                  <ScrollViewer><StackPanel IsItemsHost="True"/></ScrollViewer>
+                </Border>
+              </Popup>
+            </Grid>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <Style TargetType="ComboBoxItem">
+      <Setter Property="Foreground" Value="{StaticResource Texto}"/>
+      <Setter Property="FontSize" Value="12.5"/>
+      <Setter Property="Padding" Value="10,7,10,7"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ComboBoxItem">
+            <Border x:Name="b" Background="Transparent" Padding="{TemplateBinding Padding}">
+              <ContentPresenter/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsHighlighted" Value="True">
+                <Setter TargetName="b" Property="Background" Value="#E03A2F"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- ===================== botoes =====================
+         O do menu principal segue o Dusklight: sem caixa, so texto em
+         maiusculas, e no hover uma varredura de gradiente que entra pela
+         esquerda e some para a direita.                                 -->
+    <Style x:Key="BtnMenu" TargetType="Button">
+      <Setter Property="Foreground" Value="{StaticResource Texto}"/>
+      <Setter Property="FontFamily" Value="{DynamicResource FonteCond}"/>
+      <Setter Property="FontSize" Value="29"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="HorizontalAlignment" Value="Left"/>
+      <Setter Property="Width" Value="404"/>
+      <Setter Property="Height" Value="52"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Grid Background="#01000000">
+              <Border x:Name="varre" CornerRadius="4" Opacity="0">
+                <Border.Background>
+                  <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                    <GradientStop Color="#E03A2F" Offset="0"/>
+                    <GradientStop Color="#B22119" Offset="0.42"/>
+                    <GradientStop Color="#00B22119" Offset="1"/>
+                  </LinearGradientBrush>
+                </Border.Background>
+              </Border>
+              <Rectangle x:Name="barra" Width="3" HorizontalAlignment="Left" Opacity="0"
+                         Fill="{StaticResource Ouro}" RadiusX="1.5" RadiusY="1.5" Margin="0,7"/>
+              <ContentPresenter x:Name="cp" VerticalAlignment="Center"
+                                HorizontalAlignment="Left" Margin="18,0,0,0"/>
+            </Grid>
+            <ControlTemplate.Triggers>
+              <EventTrigger RoutedEvent="MouseEnter">
+                <BeginStoryboard>
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="varre" Storyboard.TargetProperty="Opacity"
+                                     To="1" Duration="0:0:0.13"/>
+                    <DoubleAnimation Storyboard.TargetName="barra" Storyboard.TargetProperty="Opacity"
+                                     To="1" Duration="0:0:0.13"/>
+                    <ThicknessAnimation Storyboard.TargetName="cp" Storyboard.TargetProperty="Margin"
+                                        To="26,0,0,0" Duration="0:0:0.16">
+                      <ThicknessAnimation.EasingFunction>
+                        <CubicEase EasingMode="EaseOut"/>
+                      </ThicknessAnimation.EasingFunction>
+                    </ThicknessAnimation>
+                  </Storyboard>
+                </BeginStoryboard>
+              </EventTrigger>
+              <EventTrigger RoutedEvent="MouseLeave">
+                <BeginStoryboard>
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="varre" Storyboard.TargetProperty="Opacity"
+                                     To="0" Duration="0:0:0.2"/>
+                    <DoubleAnimation Storyboard.TargetName="barra" Storyboard.TargetProperty="Opacity"
+                                     To="0" Duration="0:0:0.2"/>
+                    <ThicknessAnimation Storyboard.TargetName="cp" Storyboard.TargetProperty="Margin"
+                                        To="18,0,0,0" Duration="0:0:0.2"/>
+                  </Storyboard>
+                </BeginStoryboard>
+              </EventTrigger>
+              <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="#5A5F67"/>
+                <Setter Property="Cursor" Value="Arrow"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <Style x:Key="BtnPrim" TargetType="Button">
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="FontFamily" Value="{DynamicResource FonteCond}"/>
+      <Setter Property="FontSize" Value="17"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="b" CornerRadius="3" Background="#D5342A">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="b" Property="Background" Value="#EE4A3D"/>
+              </Trigger>
+              <Trigger Property="IsEnabled" Value="False">
+                <Setter TargetName="b" Property="Background" Value="#3C4046"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <Style x:Key="BtnSec" TargetType="Button">
+      <Setter Property="Foreground" Value="#D2D6DC"/>
+      <Setter Property="FontSize" Value="12.5"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="b" CornerRadius="3" BorderThickness="1"
+                    BorderBrush="#3A4048" Background="#191D23">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="b" Property="Background" Value="#242931"/>
+                <Setter TargetName="b" Property="BorderBrush" Value="#6A7480"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <Style x:Key="BtnLink" TargetType="Button">
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="b" Background="Transparent" Padding="6,4" CornerRadius="3">
+              <ContentPresenter VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="b" Property="Background" Value="#1EFFFFFF"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <Style x:Key="BtnFechar" TargetType="Button" BasedOn="{StaticResource BtnLink}">
+      <Setter Property="Foreground" Value="#8C929B"/>
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="Width" Value="30"/>
+      <Setter Property="Height" Value="26"/>
+    </Style>
+  </Window.Resources>
+
+  <Border CornerRadius="8" Background="#07080A" BorderBrush="#23272D" BorderThickness="1">
+    <Grid>
+      <Grid.OpacityMask>
+        <VisualBrush>
+          <VisualBrush.Visual>
+            <Border Background="White" CornerRadius="7"
+                    Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Grid}}"
+                    Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Grid}}"/>
+          </VisualBrush.Visual>
+        </VisualBrush>
+      </Grid.OpacityMask>
+
+      <!-- ============ arte em tela cheia, nitida ============
+           Ancorada a' direita para o Anderson Silva e a marca do jogo
+           ficarem sempre visiveis; o menu ocupa o lado escuro.       -->
+      <Image x:Name="ImgFundo" Stretch="UniformToFill"
+             HorizontalAlignment="Right" VerticalAlignment="Center"
+             RenderOptions.BitmapScalingMode="HighQuality"/>
+
+      <!-- veu horizontal: opaco na esquerda, transparente na direita -->
+      <Rectangle>
+        <Rectangle.Fill>
+          <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+            <GradientStop Color="#FA07080A" Offset="0.0"/>
+            <GradientStop Color="#E607080A" Offset="0.30"/>
+            <GradientStop Color="#7A07080A" Offset="0.55"/>
+            <GradientStop Color="#0007080A" Offset="0.82"/>
+          </LinearGradientBrush>
+        </Rectangle.Fill>
+      </Rectangle>
+      <!-- vinheta inferior, para os blocos de canto respirarem -->
+      <Rectangle VerticalAlignment="Bottom" Height="190">
+        <Rectangle.Fill>
+          <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#0007080A" Offset="0"/>
+            <GradientStop Color="#C007080A" Offset="1"/>
+          </LinearGradientBrush>
+        </Rectangle.Fill>
+      </Rectangle>
+
+      <!-- escurece a arte quando um painel de conteudo esta aberto -->
+      <Rectangle x:Name="VeuPainel" Fill="#EE07080A" Opacity="0" IsHitTestVisible="False"/>
+
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="46"/>
+          <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ================= BARRA SUPERIOR ================= -->
+        <Grid x:Name="BarraTitulo" Background="#01000000">
+          <TextBlock Text="UFC 3 RECOMP" Foreground="#7E848D" FontSize="11.5"
+                     FontFamily="{DynamicResource FonteCondNegrito}" FontWeight="Bold"
+                     VerticalAlignment="Center" Margin="22,0,0,0"/>
+          <Button x:Name="BtnSair" Content="✕" Style="{StaticResource BtnFechar}"
+                  HorizontalAlignment="Right" Margin="0,0,14,0"/>
+        </Grid>
+
+        <!-- ================= PRINCIPAL ================= -->
+        <Grid x:Name="PainelPrincipal" Grid.Row="1" Visibility="Collapsed">
+
+          <!-- bloco do menu: esquerda, centralizado na vertical -->
+          <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" Margin="84,0,0,26">
+            <StackPanel.RenderTransform><TranslateTransform x:Name="MenuT" Y="14"/></StackPanel.RenderTransform>
+
+            <StackPanel x:Name="An0" Opacity="0">
+              <StackPanel Orientation="Horizontal">
+                <Rectangle Width="26" Height="3" Fill="{StaticResource Realce}" VerticalAlignment="Center"
+                           RadiusX="1.5" RadiusY="1.5"/>
+                <TextBlock Text="RECOMPILAÇÃO ESTÁTICA · XBOX 360 → PC"
+                           Style="{StaticResource Sobrancelha}" VerticalAlignment="Center"
+                           Margin="11,1,0,0"/>
+              </StackPanel>
+              <TextBlock Text="UFC UNDISPUTED 3" Foreground="#F7F8FA"
+                         FontFamily="{DynamicResource FonteCondNegrito}" FontWeight="Bold" FontSize="60"
+                         Margin="-3,4,0,0">
+                <TextBlock.Effect>
+                  <DropShadowEffect BlurRadius="18" ShadowDepth="2" Direction="270"
+                                    Opacity="0.85" Color="#000000"/>
+                </TextBlock.Effect>
+              </TextBlock>
+            </StackPanel>
+
+            <StackPanel Margin="0,34,0,0">
+              <Button x:Name="BtnJogar"       Content="JOGAR"            Style="{StaticResource BtnMenu}" Opacity="0"/>
+              <Button x:Name="BtnConfig"      Content="CONFIGURAÇÕES"    Style="{StaticResource BtnMenu}" Opacity="0"/>
+              <Button x:Name="BtnReconstruir" Content="RECONSTRUIR"      Style="{StaticResource BtnMenu}" Opacity="0"/>
+              <Button x:Name="BtnApoiar"      Content="APOIAR O PROJETO" Style="{StaticResource BtnMenu}" Opacity="0"/>
+            </StackPanel>
+          </StackPanel>
+
+          <!-- canto inferior esquerdo: situacao da instalacao -->
+          <StackPanel x:Name="An5" HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                      Margin="84,0,0,44" Opacity="0">
+            <StackPanel Orientation="Horizontal">
+              <Ellipse Width="8" Height="8" Fill="{StaticResource Bom}" VerticalAlignment="Center"/>
+              <TextBlock x:Name="TxtSituacao" Text="Pronto para jogar" Margin="9,0,0,0"
+                         Style="{StaticResource Canto}" Foreground="{StaticResource Bom}"/>
+            </StackPanel>
+            <TextBlock x:Name="TxtResumo" Style="{StaticResource Canto}" Margin="17,5,0,0"
+                       FontSize="11.5" Foreground="{StaticResource TextoTenue}" Text=""/>
+
+            <Rectangle Height="1" Width="230" Fill="#2E3339" HorizontalAlignment="Left" Margin="0,17,0,0"/>
+
+            <Button x:Name="BtnGitHub" Style="{StaticResource BtnLink}" HorizontalAlignment="Left"
+                    Margin="-6,11,0,0" ToolTip="Abrir o repositório no GitHub">
+              <StackPanel Orientation="Horizontal">
+                <Path Width="17" Height="17" Stretch="Uniform" Fill="#FFFFFF" VerticalAlignment="Center"
+                      Data="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                <TextBlock Text="github.com/paulogaab21/ufc3recomp" Style="{StaticResource Canto}"
+                           Foreground="#FFFFFF" FontSize="13.5" FontWeight="SemiBold" Margin="9,0,0,0"/>
+              </StackPanel>
+            </Button>
+
+            <StackPanel Orientation="Horizontal" Margin="1,4,0,0">
+              <TextBlock Text="Projeto brasileiro, código aberto" Style="{StaticResource Canto}"
+                         FontSize="12" Foreground="#C9CED5" VerticalAlignment="Center"/>
+              <Grid Width="21" Height="14.5" Margin="8,0,0,0" VerticalAlignment="Center">
+                <Rectangle Fill="#009C3B" RadiusX="1" RadiusY="1"/>
+                <Polygon Points="10.5,1.7 19.3,7.25 10.5,12.8 1.7,7.25" Fill="#FFDF00"/>
+                <Ellipse Width="5.8" Height="5.8" Fill="#002776"
+                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+              </Grid>
+            </StackPanel>
+          </StackPanel>
+
+          <!-- entrada escalonada, como a do Dusklight -->
+          <Grid.Triggers>
+            <EventTrigger RoutedEvent="Grid.Loaded">
+              <BeginStoryboard>
+                <Storyboard>
+                  <DoubleAnimation Storyboard.TargetName="MenuT" Storyboard.TargetProperty="Y"
+                                   From="14" To="0" Duration="0:0:0.42">
+                    <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+                  </DoubleAnimation>
+                  <DoubleAnimation Storyboard.TargetName="An0" Storyboard.TargetProperty="Opacity"
+                                   To="1" BeginTime="0:0:0.05" Duration="0:0:0.34"/>
+                  <DoubleAnimation Storyboard.TargetName="BtnJogar" Storyboard.TargetProperty="Opacity"
+                                   To="1" BeginTime="0:0:0.16" Duration="0:0:0.30"/>
+                  <DoubleAnimation Storyboard.TargetName="BtnConfig" Storyboard.TargetProperty="Opacity"
+                                   To="1" BeginTime="0:0:0.23" Duration="0:0:0.30"/>
+                  <DoubleAnimation Storyboard.TargetName="BtnReconstruir" Storyboard.TargetProperty="Opacity"
+                                   To="1" BeginTime="0:0:0.30" Duration="0:0:0.30"/>
+                  <DoubleAnimation Storyboard.TargetName="BtnApoiar" Storyboard.TargetProperty="Opacity"
+                                   To="1" BeginTime="0:0:0.37" Duration="0:0:0.30"/>
+                  <DoubleAnimation Storyboard.TargetName="An5" Storyboard.TargetProperty="Opacity"
+                                   To="1" BeginTime="0:0:0.46" Duration="0:0:0.34"/>
+                </Storyboard>
+              </BeginStoryboard>
+            </EventTrigger>
+          </Grid.Triggers>
+        </Grid>
+
+        <!-- ================= SETUP ================= -->
+        <Grid x:Name="PainelSetup" Grid.Row="1" Margin="84,2,84,26" Visibility="Collapsed">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+          </Grid.RowDefinitions>
+
+          <StackPanel Grid.Row="0">
+            <TextBlock Text="PRIMEIRA CONFIGURAÇÃO" Style="{StaticResource Sobrancelha}"/>
+            <TextBlock x:Name="TxtSetupTitulo" Text="Da ISO ao jogo" Foreground="#F5F6F8" FontSize="34"
+                       FontFamily="{DynamicResource FonteCondNegrito}" Margin="-2,2,0,0"/>
+            <TextBlock x:Name="TxtSetupDescricao" Foreground="{StaticResource TextoFraco}" FontSize="13" Margin="0,10,0,0"
+                       TextWrapping="Wrap" MaxWidth="740" HorizontalAlignment="Left"
+                       Text="Aponte para a ISO do seu disco de UFC Undisputed 3, ou para uma pasta já extraída. O launcher extrai, traduz o executável do console para C++ e compila. A primeira vez leva alguns minutos."/>
+            <TextBlock Foreground="{StaticResource TextoTenue}" FontSize="12" Margin="0,9,0,0"
+                       TextWrapping="Wrap" MaxWidth="740" HorizontalAlignment="Left"
+                       Text="A imagem tem que vir do seu próprio disco original. O ufc3Recomp não distribui nenhum arquivo do jogo — ele traduz o executável do disco que você já tem."/>
+          </StackPanel>
+
+          <Grid Grid.Row="1" Margin="0,22,0,0">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="TxtPasta" Grid.Column="0" Style="{StaticResource CaixaTexto}"/>
+            <Button x:Name="BtnEscolherIso" Grid.Column="1" Content="ISO..."
+                    Style="{StaticResource BtnSec}" Width="78" Height="32" Margin="8,0,0,0"/>
+            <Button x:Name="BtnEscolherPasta" Grid.Column="2" Content="Pasta..."
+                    Style="{StaticResource BtnSec}" Width="78" Height="32" Margin="8,0,0,0"/>
+          </Grid>
+
+          <StackPanel Grid.Row="2" Margin="0,16,0,0">
+            <!-- Estado da imagem de disco, no modelo do Dusklight: em vez de
+                 confiar no caminho, o cabecalho do XEX e lido e o resultado
+                 aparece com todas as letras.                                -->
+            <StackPanel Orientation="Horizontal">
+              <Ellipse x:Name="PontoDisco" Width="8" Height="8" Fill="#9A968B" VerticalAlignment="Center"/>
+              <TextBlock x:Name="TxtDiscoRotulo" Margin="9,0,0,0" FontSize="12.5"
+                         Foreground="#9A968B" Text="Nenhuma origem selecionada"/>
+            </StackPanel>
+            <TextBlock x:Name="TxtDiscoDetalhe" Margin="17,4,0,0" FontSize="11.5"
+                       Foreground="{StaticResource TextoTenue}" TextWrapping="Wrap"
+                       Text="Escolha a ISO do seu disco, ou uma pasta já extraída."/>
+
+            <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+              <Ellipse x:Name="PontoFerr" Width="8" Height="8" Fill="#9A968B" VerticalAlignment="Center"/>
+              <TextBlock x:Name="TxtFerrRotulo" Margin="9,0,0,0" FontSize="12.5"
+                         Foreground="#9A968B" Text="Verificando ferramentas"/>
+            </StackPanel>
+            <TextBlock x:Name="TxtFerrDetalhe" Margin="17,4,0,0" FontSize="11.5"
+                       Foreground="{StaticResource TextoTenue}" TextWrapping="Wrap" Text=""/>
+
+            <Rectangle Height="1" Fill="#22262C" Margin="0,16,0,14"/>
+
+            <TextBlock x:Name="TxtEtapa" Text="Aguardando"
+                       Foreground="{StaticResource Texto}" FontSize="12.5"/>
+            <ProgressBar x:Name="BarraProgresso" Height="3" Margin="0,9,0,0"
+                         Background="#1A1E24" Foreground="#E03A2F" BorderThickness="0"/>
+          </StackPanel>
+
+          <TextBox x:Name="TxtLog" Grid.Row="3" Margin="0,14,0,0"
+                   Background="#0A0C0F" Foreground="#79828E" BorderBrush="#22262C"
+                   FontFamily="Consolas" FontSize="11" IsReadOnly="True"
+                   VerticalScrollBarVisibility="Auto" TextWrapping="NoWrap"/>
+
+          <Button x:Name="BtnInstalar" Grid.Row="4" Content="INSTALAR E COMPILAR"
+                  Style="{StaticResource BtnPrim}" Height="42" Width="238"
+                  HorizontalAlignment="Right" Margin="0,16,0,0"/>
+        </Grid>
+
+        <!-- ================= CONFIGURACOES ================= -->
+        <Grid x:Name="PainelConfig" Grid.Row="1" Margin="84,2,84,24" Visibility="Collapsed">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+          </Grid.RowDefinitions>
+
+          <StackPanel Grid.Row="0">
+            <TextBlock Text="AJUSTES" Style="{StaticResource Sobrancelha}"/>
+            <TextBlock Text="Configurações" Foreground="#F5F6F8" FontSize="34"
+                       FontFamily="{DynamicResource FonteCondNegrito}" Margin="-2,2,0,0"/>
+          </StackPanel>
+
+          <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,10,0,0">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="52"/>
+                <ColumnDefinition Width="*"/>
+              </Grid.ColumnDefinitions>
+
+              <StackPanel Grid.Column="0">
+                <TextBlock Text="VÍDEO" Style="{StaticResource Titulo}"/>
+                <TextBlock Text="Resolução" Style="{StaticResource Rotulo}" Margin="0,4,0,4"/>
+                <ComboBox x:Name="CbResolucao"/>
+                <TextBlock Text="Resolução de renderização (draw supersampling)"
+                           Style="{StaticResource Rotulo}" Margin="0,13,0,4"/>
+                <ComboBox x:Name="CbDraw"/>
+                <TextBlock x:Name="TxtDrawDica" Style="{StaticResource Dica}" Margin="0,5,0,0"
+                           Text="É a resolução em que o jogo desenha, antes de ir para a tela."/>
+                <TextBlock Text="Qualidade gráfica" Style="{StaticResource Rotulo}" Margin="0,13,0,4"/>
+                <ComboBox x:Name="CbQualidade"/>
+                <TextBlock x:Name="TxtQualidadeDica" Style="{StaticResource Dica}" Margin="0,5,0,0"
+                           Text="Ajusta filtragem de textura, cache e precisão de profundidade."/>
+                <TextBlock Text="Taxa de atualização (Hz)" Style="{StaticResource Rotulo}" Margin="0,13,0,4"/>
+                <TextBox x:Name="TxtHz" Style="{StaticResource CaixaTexto}" Height="30"/>
+                <CheckBox x:Name="ChkTelaCheia" Content="Tela cheia" Margin="0,14,0,0"/>
+                <CheckBox x:Name="ChkVSync" Content="VSync"/>
+                <TextBlock Style="{StaticResource Dica}" Margin="22,0,0,0"
+                           Text="Mantenha ligado. Desligado, a simulação do jogo passa a 1000 Hz e tudo corre rápido demais."/>
+                <CheckBox x:Name="ChkShaderAsync" Content="Compilação assíncrona de shader" Margin="0,9,0,0"/>
+                <TextBlock Style="{StaticResource Dica}" Margin="22,0,0,0"
+                           Text="Evita travadas ao ver um efeito pela primeira vez."/>
+              </StackPanel>
+
+              <StackPanel Grid.Column="2">
+                <TextBlock Text="IDIOMA" Style="{StaticResource Titulo}"/>
+                <ComboBox x:Name="CbIdioma"/>
+                <TextBlock Style="{StaticResource Dica}" Margin="0,5,0,0"
+                           Text="É o idioma que o console informa ao jogo. Só vale para os idiomas presentes no seu disco."/>
+                <TextBlock Text="ÁUDIO" Style="{StaticResource Titulo}"/>
+                <CheckBox x:Name="ChkMudo" Content="Mudo"/>
+                <TextBlock Text="CONTROLES" Style="{StaticResource Titulo}"/>
+                <CheckBox x:Name="ChkTecMouse" Content="Teclado e mouse"/>
+                <TextBlock Text="Sensibilidade do mouse" Style="{StaticResource Rotulo}" Margin="0,13,0,6"/>
+                <Slider x:Name="SldSens" Minimum="0.1" Maximum="5" TickFrequency="0.1"
+                        IsSnapToTickEnabled="True" Width="230" HorizontalAlignment="Left"/>
+              </StackPanel>
+            </Grid>
+          </ScrollViewer>
+
+          <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
+            <TextBlock Style="{StaticResource Rotulo}" VerticalAlignment="Center" Margin="0,0,16,0"
+                       Foreground="{StaticResource TextoTenue}"
+                       Text="Salvo em ufc3.toml — a tela de opções dentro do jogo usa o mesmo arquivo."/>
+            <Button x:Name="BtnVoltar" Content="SALVAR E VOLTAR"
+                    Style="{StaticResource BtnPrim}" Width="168" Height="38"/>
+          </StackPanel>
+        </Grid>
+
+        <!-- ================= APOIAR ================= -->
+        <Grid x:Name="PainelApoiar" Grid.Row="1" Margin="84,2,84,24" Visibility="Collapsed">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+          </Grid.RowDefinitions>
+
+          <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="52"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+              <TextBlock Text="CONTRIBUA" Style="{StaticResource Sobrancelha}"/>
+              <TextBlock Text="Apoie o ufc3Recomp" Foreground="#F5F6F8" FontSize="38"
+                         FontFamily="{DynamicResource FonteCondNegrito}" Margin="-2,2,0,0"/>
+              <Rectangle Height="3" Width="52" Fill="{StaticResource Realce}" RadiusX="1.5" RadiusY="1.5"
+                         HorizontalAlignment="Left" Margin="0,16,0,0"/>
+
+              <TextBlock Foreground="{StaticResource TextoFraco}" FontSize="13.5" TextWrapping="Wrap"
+                         LineHeight="21" Margin="0,20,0,0"
+                         Text="Este projeto é feito por uma pessoa só, no tempo livre, e vai continuar aberto e gratuito para todo mundo."/>
+              <TextBlock Foreground="{StaticResource TextoFraco}" FontSize="13.5" TextWrapping="Wrap"
+                         LineHeight="21" Margin="0,12,0,0"
+                         Text="Traduzir o executável do Xbox 360 para C++ é um trabalho longo: cada função que o jogo usa precisa ser encontrada e conferida à mão, uma por uma."/>
+              <TextBlock Foreground="{StaticResource Texto}" FontSize="16" TextWrapping="Wrap" Margin="0,22,0,0"
+                         FontFamily="{DynamicResource FonteCondNegrito}" FontWeight="Bold"
+                         Text="Se o ufc3Recomp te ajudou, contribua com qualquer valor para o desenvolvimento continuar."/>
+              <TextBlock Foreground="{StaticResource TextoTenue}" FontSize="12" TextWrapping="Wrap" Margin="0,10,0,0"
+                         Text="Não existe valor mínimo — o que você puder ajuda. Nada no projeto fica bloqueado atrás de doação."/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+              <Border Background="#FFFFFF" CornerRadius="8" Padding="15" HorizontalAlignment="Center">
+                <Border.Effect>
+                  <DropShadowEffect BlurRadius="26" ShadowDepth="5" Direction="270" Opacity="0.55"/>
+                </Border.Effect>
+                <Image x:Name="ImgQr" Width="336" Height="336"
+                       RenderOptions.BitmapScalingMode="HighQuality"/>
+              </Border>
+              <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,0">
+                <Border Background="#191D23" BorderBrush="#3A4048" BorderThickness="1"
+                        CornerRadius="3" Padding="11,4">
+                  <TextBlock Text="PIX" Foreground="{StaticResource Texto}" FontSize="12"
+                             FontFamily="{DynamicResource FonteCondNegrito}"/>
+                </Border>
+                <TextBlock Text="Aponte a câmera do seu banco" Foreground="{StaticResource TextoFraco}"
+                           FontSize="12.5" VerticalAlignment="Center" Margin="10,0,0,0"/>
+              </StackPanel>
+            </StackPanel>
+          </Grid>
+
+          <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
+            <TextBlock Style="{StaticResource Rotulo}" VerticalAlignment="Center" Margin="0,0,16,0"
+                       Foreground="{StaticResource TextoTenue}" Text="Obrigado por jogar."/>
+            <Button x:Name="BtnVoltarApoiar" Content="VOLTAR"
+                    Style="{StaticResource BtnPrim}" Width="168" Height="38"/>
+          </StackPanel>
+        </Grid>
+      </Grid>
+    </Grid>
+  </Border>
+</Window>

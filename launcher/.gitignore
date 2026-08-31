@@ -1,0 +1,8 @@
+# Saida de compilacao e configuracao local. O launcher e' um unico exe gerado
+# por Compilar.ps1; nada aqui precisa ser versionado.
+UFC3 Launcher.exe
+launcher.cfg
+ufc3.toml
+ufc3.sha256
+*.log
+src.bak-*/
