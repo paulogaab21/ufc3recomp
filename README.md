@@ -10,7 +10,7 @@ direto no processador, sem interpretar nada em tempo real.
 ---
 
 > ## ⚠️ Você precisa do seu próprio disco de UFC Undisputed 3
-> **Este projeto não distribui o jogo.** A release traz apenas o executável
+> **Este projeto não distribui o jogo.** 
 ---
 
 ## Gameplay em 2K
