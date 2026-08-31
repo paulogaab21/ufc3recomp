@@ -34,3 +34,7 @@ desktop.ini
 
 # Saves, perfil e cache de shader do jogador. Dados pessoais, nunca commitar.
 userdata/
+
+# Cache do Python
+__pycache__/
+*.pyc

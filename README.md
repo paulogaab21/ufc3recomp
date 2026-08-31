@@ -169,7 +169,7 @@ Quatro delas travavam a geração do código e foram corrigidas à mão:
 Uma quinta (`0x831820A8`, um inicializador estático) só apareceu em runtime.
 
 Resolver isso caso a caso não escala. Existe um detector em
-`work/find_orphans.py` que desmonta os 17 MB de código, cruza com as funções
+[`tools/find_orphans.py`](tools/find_orphans.py) que desmonta os 17 MB de código, cruza com as funções
 que o recompilador já conhece e procura código válido que não é alvo de nenhum
 branch direto. Ele acha o caso confirmado com o tamanho exato — mas a detecção
 de **fim** de função ainda é ingênua (para no primeiro terminador, e função
@@ -285,6 +285,11 @@ Não tenho pressa nem promessa de entrega. Vou publicando o que for saindo.
 
 Se você entende de PowerPC, de engenharia reversa de Xbox 360, ou só quer
 acompanhar, issues e discussões são bem-vindas.
+
+Agora que o código está aberto, dá para contribuir de verdade. O
+[CONTRIBUTING](CONTRIBUTING.md) diz onde a ajuda faz mais diferença — e,
+principalmente, **o que eu já tentei e não deu certo**, para ninguém repetir.
+As ferramentas de análise estão em [`tools/`](tools/), cada uma explicada.
 
 ---
 

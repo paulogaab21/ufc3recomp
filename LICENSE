@@ -1,0 +1,37 @@
+MIT License
+
+Copyright (c) 2026 Paulo Gabriel Da Silva
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+Esta licenca cobre APENAS o codigo deste repositorio: o manifesto de funcoes,
+as ferramentas de analise, o launcher e o codigo do projeto.
+
+Ela NAO cobre, e nao poderia cobrir:
+
+  - UFC Undisputed 3, seus dados, arte, audio, video e codigo original, que
+    sao propriedade da THQ / Yuke's / seus respectivos detentores;
+  - o ReXGlue SDK, que tem a propria licenca;
+  - a familia de fontes Fira Sans, sob SIL Open Font License 1.1
+    (ver launcher/src/FONTES.txt).
+
+Nada do disco do jogo esta neste repositorio, e nada dele pode ser
+redistribuido sob esta licenca.
