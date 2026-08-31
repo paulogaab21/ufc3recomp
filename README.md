@@ -111,9 +111,21 @@ provavelmente a contribuição mais valiosa que alguém pode fazer aqui.
 
 ## Você precisa do seu próprio disco
 
-**Este repositório não contém nenhum arquivo do jogo, e nunca vai conter.**
+**Nem o repositório nem a release contêm arquivos do disco de UFC Undisputed 3.**
 
-Para compilar você precisa extrair, do seu próprio disco de UFC Undisputed 3:
+O executável da release é o código do jogo traduzido de PowerPC para C++ e
+compilado como programa nativo. Ele não carrega nada de dentro de si: todo o
+conteúdo continua no seu disco — texturas, áudio, vídeo, modelos e os dados dos
+lutadores. São 6.451 MB de dados contra 93 MB de executável; o código é 1,4% do
+jogo.
+
+Sem o disco o jogo nem abre: ele para com `Entrypoint XEX not found`.
+
+O launcher pede a ISO do seu disco, ou uma pasta já extraída, e confere pelo
+cabeçalho do XEX que é mesmo UFC Undisputed 3 (title ID `5451087D`) antes de
+seguir.
+
+Para compilar por conta própria você precisa extrair, do seu próprio disco:
 
 ```
 assets/game/default.xex
