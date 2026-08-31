@@ -10,20 +10,7 @@ direto no processador, sem interpretar nada em tempo real.
 ---
 
 > ## ⚠️ Você precisa do seu próprio disco de UFC Undisputed 3
->
 > **Este projeto não distribui o jogo.** A release traz apenas o executável
-> traduzido — 93 MB de código. Todo o conteúdo continua vindo do **seu** disco:
-> texturas, áudio, vídeo, modelos e os dados dos lutadores, 6.451 MB que o jogo
-> lê enquanto roda. O código é 1,4% do jogo; o resto é seu.
->
-> Sem o disco ele nem abre: para com `Entrypoint XEX not found`.
->
-> O launcher lê o cabeçalho do XEX e confere que a imagem é mesmo UFC Undisputed 3
-> (title ID `5451087D`) antes de continuar. Apontou outro jogo, ele avisa qual
-> encontrou e não segue.
->
-> Não pedimos, não hospedamos e não aceitamos imagens de disco. Use o seu.
-
 ---
 
 ## Gameplay em 2K
