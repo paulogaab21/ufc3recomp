@@ -9,6 +9,23 @@ direto no processador, sem interpretar nada em tempo real.
 
 ---
 
+> ## ⚠️ Você precisa do seu próprio disco de UFC Undisputed 3
+>
+> **Este projeto não distribui o jogo.** A release traz apenas o executável
+> traduzido — 93 MB de código. Todo o conteúdo continua vindo do **seu** disco:
+> texturas, áudio, vídeo, modelos e os dados dos lutadores, 6.451 MB que o jogo
+> lê enquanto roda. O código é 1,4% do jogo; o resto é seu.
+>
+> Sem o disco ele nem abre: para com `Entrypoint XEX not found`.
+>
+> O launcher lê o cabeçalho do XEX e confere que a imagem é mesmo UFC Undisputed 3
+> (title ID `5451087D`) antes de continuar. Apontou outro jogo, ele avisa qual
+> encontrou e não segue.
+>
+> Não pedimos, não hospedamos e não aceitamos imagens de disco. Use o seu.
+
+---
+
 ## Gameplay em 2K
 
 **UFC Undisputed 3 está jogável no PC, em 2560x1440, por meio desta recompilação.**
@@ -175,23 +192,12 @@ provavelmente a contribuição mais valiosa que alguém pode fazer aqui.
 
 ---
 
-## Você precisa do seu próprio disco
+## Compilando por conta própria
 
-**Nem o repositório nem a release contêm arquivos do disco de UFC Undisputed 3.**
+Isto é para quem quer fazer a tradução na própria máquina. Para só jogar, use a
+[release](../../releases/latest) — ela não exige nenhuma ferramenta.
 
-O executável da release é o código do jogo traduzido de PowerPC para C++ e
-compilado como programa nativo. Ele não carrega nada de dentro de si: todo o
-conteúdo continua no seu disco — texturas, áudio, vídeo, modelos e os dados dos
-lutadores. São 6.451 MB de dados contra 93 MB de executável; o código é 1,4% do
-jogo.
-
-Sem o disco o jogo nem abre: ele para com `Entrypoint XEX not found`.
-
-O launcher pede a ISO do seu disco, ou uma pasta já extraída, e confere pelo
-cabeçalho do XEX que é mesmo UFC Undisputed 3 (title ID `5451087D`) antes de
-seguir.
-
-Para compilar por conta própria você precisa extrair, do seu próprio disco:
+Primeiro, extraia do seu disco:
 
 ```
 assets/game/default.xex
@@ -199,12 +205,10 @@ assets/game/default.xex
 
 Sem esse arquivo não há o que recompilar.
 
----
-
-## Compilando
-
-Precisa de: Clang 20+, CMake 3.25+, Ninja, e no Windows os Build Tools da MSVC
-(o Clang usa os headers e libs deles). Mais o ReXGlue SDK.
+Depois: Clang 18+, CMake 3.25+, Ninja e o ReXGlue SDK. No Windows tudo isso, com
+exceção do SDK, vem junto com os **Build Tools da MSVC** — o Clang usa os headers
+e libs deles, e o link é feito no ABI da Microsoft. Não é preciso instalar cmake
+nem ninja à parte.
 
 ```bash
 # 1. traduz o XEX para C++
