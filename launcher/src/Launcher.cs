@@ -490,9 +490,13 @@ internal sealed class Janela {
     // isso e a pasta do launcher; no modo bancada, a pasta de build. Errar isso
     // faz o jogo subir sem gpu_plugin = "xenos" e a tela ficar preta.
     static readonly string Toml     = Path.Combine(Path.GetDirectoryName(Exe), "ufc3.toml");
-    /// Saves e cache. Dentro do projeto, mas fora de out/build de proposito:
-    /// apagar o diretorio de build nao pode levar o progresso do jogador.
-    public static readonly string PastaDados = Path.Combine(Projeto, "userdata");
+    // No pacote pronto, saves, cache e logs ficam ao lado do launcher. Nunca
+    // podemos levar para outra maquina o caminho absoluto da bancada do
+    // desenvolvedor. No modo de desenvolvimento eles continuam fora de
+    // out/build, para um rebuild nao apagar o progresso local.
+    public static readonly string PastaDados = ModoPronto
+        ? Path.Combine(RaizApp, "userdata")
+        : Path.Combine(Projeto, "userdata");
 
     readonly string _raiz;
     readonly string _cfgPath;
@@ -697,7 +701,12 @@ internal sealed class Janela {
         _cfg.PastaDados = PastaDados;
         Directory.CreateDirectory(PastaDados);
         _cfg.Salvar(_cfgPath);
-        if (Directory.Exists(BuildDir)) _cfg.EscreverToml(Toml);
+        // Testa a pasta real do executavel, nao o BuildDir fixo da bancada.
+        // No pacote distribuido o ufc3.exe fica ao lado do launcher e tambem
+        // precisa receber o TOML; sem gpu_plugin = "xenos" a tela fica preta.
+        string pastaExe = Path.GetDirectoryName(Exe);
+        if (!string.IsNullOrEmpty(pastaExe) && Directory.Exists(pastaExe))
+            _cfg.EscreverToml(Toml);
     }
 
     void EscolherArquivo() {

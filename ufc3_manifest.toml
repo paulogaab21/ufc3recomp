@@ -157,3 +157,7 @@ includes = []
 # Funcao alcancada so indiretamente (inicia com 'lwz', sem prologo).
 # Fim em 0x82A9A8D4 -- grafo fechou com 9 instrucoes.
 0x82A9A8B0 = { size = 0x24 }
+
+# Getter-folha alcancado so indiretamente por vtable (sem prologo).
+# Fim em 0x82E82B4C -- grafo fechou com 3 instrucoes.
+0x82E82B40 = { size = 0xC }

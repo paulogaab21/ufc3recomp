@@ -6,6 +6,8 @@
 
 #include <rex/rex_app.h>
 
+#include "captura_falhas.h"
+
 class Ufc3App : public rex::ReXApp {
  public:
   using rex::ReXApp::ReXApp;
@@ -16,8 +18,13 @@ class Ufc3App : public rex::ReXApp {
         PPCImageConfig));
   }
 
+  // O ReXGlue nao instala manipulador de excecao, entao um crash duro nao
+  // deixava nada para investigar: o processo sumia e o log parava no meio de
+  // uma linha. Instalado aqui porque o log ja esta de pe e o jogo ainda nao
+  // comecou a rodar.
+  void OnPostInitLogging() override { ufc3::captura::Instalar(); }
+
   // Override virtual hooks for customization:
-  // void OnPostInitLogging() override {}
   // void OnPreSetup(rex::RuntimeConfig& config) override {}
   // void OnLoadXexImage(std::string& xex_image) override {}
   // void OnPostLoadXexImage() override {}

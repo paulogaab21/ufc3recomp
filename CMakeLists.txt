@@ -31,3 +31,9 @@ else()
 endif()
 
 rexglue_setup_target(ufc3 GPU_PLUGINS xenos)
+
+if(WIN32)
+    # MiniDumpWriteDump, usado por src/captura_falhas.h para gravar o despejo
+    # quando o jogo morre.
+    target_link_libraries(ufc3 PRIVATE Dbghelp)
+endif()

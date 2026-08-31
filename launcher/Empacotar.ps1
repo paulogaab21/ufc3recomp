@@ -67,7 +67,9 @@ $itens | ForEach-Object { "  $_" }
 foreach ($lixo in 'launcher.cfg', 'ufc3.sha256') {
     Remove-Item (Join-Path $Destino $lixo) -Force -EA SilentlyContinue
 }
-Get-ChildItem $Destino -Filter *.log -File -EA SilentlyContinue | Remove-Item -Force
+Get-ChildItem $Destino -Filter *.log -File -Recurse -EA SilentlyContinue | Remove-Item -Force
+Remove-Item (Join-Path $Destino 'logs') -Recurse -Force -EA SilentlyContinue
+Remove-Item (Join-Path $Destino 'cache') -Recurse -Force -EA SilentlyContinue
 
 # Gera o toml abrindo o launcher sem configuracao: sai exatamente o que uma
 # instalacao nova produz, e nao os ajustes de quem empacotou.
