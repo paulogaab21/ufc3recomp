@@ -193,6 +193,10 @@ assets/game/default.xex
 
 Sem esse arquivo não há o que recompilar.
 
+Só o preset **`win-amd64-relwithdebinfo`** foi testado. O `CMakePresets.json`
+vem do `rexglue init` e lista também Linux, macOS e ARM64 — nenhum desses foi
+exercitado aqui, então trate-os como ponto de partida, não como suporte.
+
 Depois: Clang 18+, CMake 3.25+, Ninja e o ReXGlue SDK. No Windows tudo isso, com
 exceção do SDK, vem junto com os **Build Tools da MSVC** — o Clang usa os headers
 e libs deles, e o link é feito no ABI da Microsoft. Não é preciso instalar cmake
@@ -219,7 +223,7 @@ inteiro passo a passo.
 
 ## Achados que voltaram para o SDK
 
-Montar isso do zero no Windows revelou **cinco** defeitos no ReXGlue SDK. Os
+Montar isso do zero no Windows revelou **seis** defeitos no ReXGlue SDK. Os
 três primeiros são da mesma família — **consumir o SDK pelo código-fonte, do
 jeito que o próprio `rexglue init` documenta, estava quebrado**:
 
@@ -252,7 +256,16 @@ Os outros dois apareceram depois, já com o jogo rodando:
    em silêncio, criando um segundo conjunto de saves em `Documentos`. O
    contorno é passar o caminho na linha de comando, que é o que o launcher faz.
 
-As correções dos três primeiros estão prontas para virar PR.
+6. **A versão do SDK é lida do repositório errado.** `rex_resolve_version`
+   usa `CMAKE_SOURCE_DIR` como padrão, que aponta para a raiz do projeto
+   **consumidor** quando o SDK entra por `add_subdirectory`. O `git describe`
+   roda então no repositório de quem usa o SDK, e uma tag de release lá em cima
+   é comparada com o piso de versão do SDK. Criar a tag `v1.0.0` neste projeto
+   foi o bastante para o configure abortar com *"floor version (0.10) is behind
+   tag version (1.0)"*. A correção é uma linha: passar
+   `SOURCE_DIR ${REXGLUE_ROOT}` na chamada.
+
+As correções dos três primeiros, mais esta última, estão prontas para virar PR.
 
 ---
 

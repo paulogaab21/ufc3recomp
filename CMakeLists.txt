@@ -10,22 +10,21 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(generated/rexglue.cmake)
 
-# Recursos do Windows (icone da janela e da barra de tarefas). enable_language
-# em vez de mexer no project(), para nao invalidar os objetos ja compilados.
-if(WIN32)
-    enable_language(RC)
-endif()
-
-# Sources
 set(UFC3_SOURCES
     src/main.cpp
 )
 
 if(WIN32)
+    # Recursos do Windows: o icone que aparece na janela, na barra de tarefas e
+    # no Alt+Tab, mais a identificacao de versao do executavel. O SDK nao define
+    # icone em tempo de execucao, entao este e o unico lugar que decide isso.
+    #
+    # enable_language em vez de mexer no project(), para nao invalidar os
+    # objetos ja compilados a cada reconfiguracao.
+    enable_language(RC)
     list(APPEND UFC3_SOURCES src/ufc3.rc)
-endif()
 
-if(WIN32)
+    # WIN32 no add_executable: subsistema grafico, sem console atras da janela.
     add_executable(ufc3 WIN32 ${UFC3_SOURCES})
 else()
     add_executable(ufc3 ${UFC3_SOURCES})
