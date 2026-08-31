@@ -9,9 +9,9 @@ direto no processador, sem interpretar nada em tempo real.
 
 ---
 
-## Gameplay — 2K / 144 FPS
+## Gameplay em 2K
 
-**UFC Undisputed 3 já está jogável no PC em 2K a 144 FPS por meio desta recompilação.**
+**UFC Undisputed 3 está jogável no PC, em 2560x1440, por meio desta recompilação.**
 
 [![UFC Undisputed 3 — jogável em 2K a 144 FPS](https://i.ytimg.com/vi/hUpWKWqRkJ8/maxresdefault.jpg)](https://www.youtube.com/watch?v=5cQYiwqAFsc)
 
@@ -19,30 +19,96 @@ direto no processador, sem interpretar nada em tempo real.
 
 [▶ Assista ao gameplay no YouTube — 2K a 144 FPS](https://www.youtube.com/watch?v=5cQYiwqAFsc)
 
-A próxima meta do projeto é atingir **2K a 244 FPS**, mantendo estabilidade e
-jogabilidade.
+### Uma palavra sobre o número de quadros
+
+Esse vídeo foi gravado com o modo de vídeo em 144 Hz, e depois descobrimos o que
+esse número significa **neste motor**, o que vale registrar.
+
+O runtime deriva o vblank do guest de `video_mode_refresh_rate`, e o jogo avança
+**um passo de simulação por vblank**. A 144 Hz a simulação anda 2,4 vezes mais
+rápido que no console: a imagem fica fluida, mas o jogo corre acelerado. Subir
+para 244 não seria uma melhoria — seria o jogo em câmera rápida.
+
+Então o número que importa aqui não é o de quadros por segundo, é o do vblank:
+**60 Hz é a velocidade correta**, e é o padrão. O ganho de PC vem da resolução e
+da filtragem, não da taxa de atualização.
 
 ---
 
 ## Em que pé está
 
-**O jogo dá boot, renderiza e já está jogável em 2K a 144 FPS.**
+**O jogo está jogável do começo ao fim, e bonito.**
 
-O que já funciona:
+Roda a 2560x1440 com filtragem anisotrópica 16x, cache de textura ampliado e
+profundidade arredondada — o resultado é bem mais nítido do que o console
+entregava, sem o cintilar de sombra que o original tinha. Menus, seleção de
+lutador, entrada no octógono, luta completa com HUD, criação de lutador e saves
+de carreira: tudo funciona.
+
+E não é preciso compilar nada para jogar. A [release](../../releases/latest) traz
+o executável pronto; você aponta o launcher para a ISO do seu disco e joga.
+
+O que está montado por baixo:
 
 - O `default.xex` é traduzido inteiro para C++ — 569 arquivos, 295 MB de código
-- Isso compila e linka num executável nativo
-- O executável sobe o runtime completo: memória do guest, SDL, entrada, áudio
-  (com as threads do decodificador XMA), sistema de arquivos virtual
-- Monta o disco do jogo e registra os caminhos `game:` e `d:` como o console faria
-- Registra **66.157 funções recompiladas** na tabela de funções
-- Carrega a imagem do XEX e resolve os imports do kernel do Xbox 360 —
-  101 do `xam`, 184 do `xboxkrnl`
-- Chega ao gameplay com imagem, áudio e entrada funcionando
-- Roda em 2K a 144 FPS no vídeo publicado
+- Isso compila e linka num executável nativo de 93 MB
+- **66.157 funções recompiladas** registradas na tabela de funções
+- Imports do kernel do Xbox 360 resolvidos: 101 do `xam`, 184 do `xboxkrnl`
+- Runtime completo no ar: memória do guest, SDL, entrada, áudio com as threads
+  do decodificador XMA, sistema de arquivos virtual montando `game:` e `d:`
+- Codegen sem nenhum aviso — o manifesto cobre todas as funções que o scanner
+  não alcança sozinho
 
-O trabalho agora está concentrado em aumentar a estabilidade, cobrir caminhos
-menos comuns e melhorar o desempenho.
+O trabalho agora é estabilidade e os cantos menos percorridos do jogo.
+
+---
+
+## Como isso evoluiu
+
+Vale registrar o caminho, porque quase nada dele foi o que eu esperava no
+começo.
+
+**O gargalo nunca foi gráfico.** É achar onde cada função começa e termina
+dentro do executável do console. Essa é a seção seguinte, e é o coração do
+projeto.
+
+**O manifesto encolheu para funcionar.** Uma tentativa de resolver na força
+bruta gerou 4.751 entradas automáticas e produziu 2.919 falhas latentes. A
+medição mostrou o oposto do esperado: 8 entradas conferidas à mão davam zero
+avisos. Hoje são **66 entradas, todas verificadas uma a uma** — e o codegen sai
+limpo. Nesse tipo de trabalho, quantidade não é progresso.
+
+**Descobrimos que o motor amarra simulação a vblank.** Foi o que explicou o
+"jogo rápido demais" e, junto, por que aumentar o supersampling derruba a
+*velocidade* em vez dos fps: a GPU satura, os vblanks atrasam, e a simulação
+anda menos. Por isso o padrão é 1x e 60 Hz.
+
+**Escala não-quadrada quebra as texturas dos lutadores.** Testamos 2x1 para
+ganhar nitidez sem o custo de 2x2: as texturas dos personagens corrompem. O
+caminho está fechado, e os dois eixos precisam andar juntos.
+
+**Cinco defeitos do SDK apareceram** — três no build, um no codegen, um no
+caminho de saves. Estão descritos mais abaixo.
+
+**O launcher virou parte do projeto**, não um acessório: é ele que faz a ponte
+da ISO até o jogo aberto, sem exigir ferramenta nenhuma de quem só quer jogar.
+
+---
+
+## O launcher
+
+Um único executável, com a interface, as imagens e as fontes embutidas — não há
+arquivo solto para alguém alterar.
+
+- Aceita a ISO do seu disco ou uma pasta já extraída
+- Lê o cabeçalho do XEX e confere o title ID (`5451087D`) antes de seguir; se
+  você apontar outro jogo, ele diz qual encontrou
+- Ajusta resolução, supersampling, presets de qualidade, idioma e controles,
+  gravando tudo no mesmo `ufc3.toml` que a tela de opções do jogo usa
+- Funciona de dois jeitos, decididos por um único teste — existe um `ufc3.exe`
+  ao lado dele? Se sim, só extrai e joga. Se não, traduz e compila.
+
+O código está em [`launcher/`](launcher).
 
 ---
 
@@ -161,9 +227,9 @@ inteiro passo a passo.
 
 ## Achados que voltaram para o SDK
 
-Montar isso do zero no Windows revelou três bugs no ReXGlue SDK, todos da mesma
-família — **consumir o SDK pelo código-fonte, do jeito que o próprio
-`rexglue init` documenta, estava quebrado**:
+Montar isso do zero no Windows revelou **cinco** defeitos no ReXGlue SDK. Os
+três primeiros são da mesma família — **consumir o SDK pelo código-fonte, do
+jeito que o próprio `rexglue init` documenta, estava quebrado**:
 
 1. **`MSPACK_DIR` apontando para uma árvore de symlinks.** No Windows o git
    materializa symlink como arquivo de texto de 29 bytes por padrão, e o clang
@@ -180,7 +246,21 @@ família — **consumir o SDK pelo código-fonte, do jeito que o próprio
    cascata — ou seja, todo projeto gerado pelo template precisa desse include,
    mas ele não propagava.
 
-As correções estão prontas para virar PR.
+Os outros dois apareceram depois, já com o jogo rodando:
+
+4. **Aviso enganoso no codegen.** `emitBranchWithBoundsCheck` avisava sobre
+   qualquer branch que saísse da função, mas thunks de despacho fazem isso o
+   tempo todo, por construção. O aviso escondia os casos que de fato importam.
+   A correção está escrita, mas **ainda não validada** — precisa de um build
+   separado para não arriscar a versão jogável.
+
+5. **`user_data_root` do TOML não tem efeito.** Em `ui/rex_app.cpp` os caminhos
+   são resolvidos a partir dos cvars **antes** de `LoadConfig()` ler o arquivo,
+   então o valor posto no TOML chega tarde demais e a pasta padrão prevalece —
+   em silêncio, criando um segundo conjunto de saves em `Documentos`. O
+   contorno é passar o caminho na linha de comando, que é o que o launcher faz.
+
+As correções dos três primeiros estão prontas para virar PR.
 
 ---
 
@@ -190,12 +270,16 @@ As correções estão prontas para virar PR.
 - [x] Compilar um executável nativo
 - [x] Fazer o runtime subir e carregar o jogo
 - [x] Passar dos inicializadores estáticos iniciais
-- [ ] Melhorar o detector de funções órfãs (seguir fluxo de controle)
-- [ ] Resolver as jump tables (`[[switch_tables]]`)
 - [x] Chegar na primeira imagem renderizada
 - [x] Chegar ao gameplay jogável
-- [x] Rodar em 2K a 144 FPS
-- [ ] Atingir 2K a 244 FPS com estabilidade
+- [x] Manifesto sem avisos no codegen (66 entradas verificadas)
+- [x] Saves de carreira funcionando e num lugar só
+- [x] Launcher: da ISO até o jogo aberto, sem exigir ferramentas
+- [x] Release pronta para jogar
+- [ ] Texturas do tronco na criação de lutador
+- [ ] Melhorar o detector de funções órfãs (seguir fluxo de controle)
+- [ ] Resolver as jump tables (`[[switch_tables]]`) — 1.067 já extraídas
+- [ ] Validar a correção nº 4 do SDK num build separado
 - [ ] Abrir os PRs no ReXGlue SDK
 
 ---
@@ -215,7 +299,13 @@ acompanhar, issues e discussões são bem-vindas.
 
 ## Legal
 
-Projeto de pesquisa e engenharia reversa para interoperabilidade. Não distribui
-nem inclui nenhum código, arte, áudio ou dado do jogo — tudo isso tem que vir
-do disco que você comprou. UFC Undisputed 3 é marca e propriedade da THQ /
-Yuke's / seus respectivos detentores, sem nenhuma relação com este projeto.
+Projeto de pesquisa e engenharia reversa para interoperabilidade.
+
+O que a release distribui é o executável do console **traduzido** para C++ e
+compilado como programa nativo — obra derivada, produzida por este projeto.
+Nenhum dado do jogo vai junto: arte, áudio, vídeo, modelos e atributos dos
+lutadores continuam vindo do disco que você comprou, e sem ele o programa nem
+abre.
+
+UFC Undisputed 3 é marca e propriedade da THQ / Yuke's / seus respectivos
+detentores, sem nenhuma relação com este projeto.
