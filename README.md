@@ -14,6 +14,32 @@ direto no processador, sem interpretar nada em tempo real.
 
 ---
 
+## Gameplay em 2K
+
+**UFC Undisputed 3 está jogável no PC, em 2560x1440, por meio desta recompilação.**
+
+[![UFC Undisputed 3 — jogável em 2K a 144 FPS](https://i.ytimg.com/vi/hUpWKWqRkJ8/maxresdefault.jpg)](https://www.youtube.com/watch?v=5cQYiwqAFsc)
+
+*Imagem de UFC Undisputed 3 — clique para assistir ao vídeo do projeto.*
+
+[▶ Assista ao gameplay no YouTube — 2K a 144 FPS](https://www.youtube.com/watch?v=5cQYiwqAFsc)
+
+### Uma palavra sobre o número de quadros
+
+Esse vídeo foi gravado com o modo de vídeo em 144 Hz, e depois descobrimos o que
+esse número significa **neste motor**, o que vale registrar.
+
+O runtime deriva o vblank do guest de `video_mode_refresh_rate`, e o jogo avança
+**um passo de simulação por vblank**. A 144 Hz a simulação anda 2,4 vezes mais
+rápido que no console: a imagem fica fluida, mas o jogo corre acelerado. Subir
+para 244 não seria uma melhoria — seria o jogo em câmera rápida.
+
+Então o número que importa aqui não é o de quadros por segundo, é o do vblank:
+**60 Hz é a velocidade correta**, e é o padrão. O ganho de PC vem da resolução e
+da filtragem, não da taxa de atualização.
+
+---
+
 ## 📱 A versão Android está chegando
 
 **UFC Undisputed 3 já está rodando em celular — nativo, sem emulação.**
@@ -43,31 +69,9 @@ vira instruções ARM de verdade e roda direto no Snapdragon.
 O desempenho é ótimo: o jogo entrega a taxa de quadros do console, em tela cheia
 e na resolução nativa do aparelho.
 
----
-
-## Gameplay em 2K
-
-**UFC Undisputed 3 está jogável no PC, em 2560x1440, por meio desta recompilação.**
-
-[![UFC Undisputed 3 — jogável em 2K a 144 FPS](https://i.ytimg.com/vi/hUpWKWqRkJ8/maxresdefault.jpg)](https://www.youtube.com/watch?v=5cQYiwqAFsc)
-
-*Imagem de UFC Undisputed 3 — clique para assistir ao vídeo do projeto.*
-
-[▶ Assista ao gameplay no YouTube — 2K a 144 FPS](https://www.youtube.com/watch?v=5cQYiwqAFsc)
-
-### Uma palavra sobre o número de quadros
-
-Esse vídeo foi gravado com o modo de vídeo em 144 Hz, e depois descobrimos o que
-esse número significa **neste motor**, o que vale registrar.
-
-O runtime deriva o vblank do guest de `video_mode_refresh_rate`, e o jogo avança
-**um passo de simulação por vblank**. A 144 Hz a simulação anda 2,4 vezes mais
-rápido que no console: a imagem fica fluida, mas o jogo corre acelerado. Subir
-para 244 não seria uma melhoria — seria o jogo em câmera rápida.
-
-Então o número que importa aqui não é o de quadros por segundo, é o do vblank:
-**60 Hz é a velocidade correta**, e é o padrão. O ganho de PC vem da resolução e
-da filtragem, não da taxa de atualização.
+O APK ainda não saiu. **No PC o jogo já está jogável do começo ao fim** — é só
+baixar a [release](../../releases/latest) e apontar o launcher para a ISO do seu
+disco.
 
 ---
 
