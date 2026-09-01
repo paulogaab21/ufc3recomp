@@ -14,6 +14,53 @@ direto no processador, sem interpretar nada em tempo real.
 
 ---
 
+## 📱 A versão Android está chegando
+
+**UFC Undisputed 3 já está rodando em celular — nativo, sem emulação.**
+
+[![UFC Undisputed 3 rodando no Galaxy S22](https://i.ytimg.com/vi/NKbL0ufgN_A/maxresdefault.jpg)](https://www.youtube.com/shorts/NKbL0ufgN_A)
+
+*Gravado num Galaxy S22. Clique para assistir.*
+
+[▶ Assista no YouTube](https://www.youtube.com/shorts/NKbL0ufgN_A)
+
+O mesmo caminho do PC, do começo ao fim: o `default.xex` é traduzido de PowerPC
+para C++ e compilado para **ARM64 nativo**. Não há emulador, não há camada de
+tradução de instruções, não há Box64 nem nada parecido no meio — o código do jogo
+vira instruções ARM de verdade e roda direto no Snapdragon.
+
+### Rodando no Galaxy S22
+
+| | |
+|---|---|
+| Aparelho | Galaxy S22 (Snapdragon 8 Gen 1, Adreno 730) |
+| Sistema | Android 16, arm64-v8a |
+| Resolução | 2340×1080, tela cheia |
+| Gráficos | Vulkan 1.4 |
+| Menus | **60 fps** |
+| Luta | **30 fps** — a mesma taxa do Xbox 360 original |
+
+O desempenho é ótimo: o jogo entrega a taxa de quadros do console, em tela cheia
+e na resolução nativa do aparelho.
+
+### O que já funciona
+
+- As quatro bibliotecas nativas compiladas para ARM64 e empacotadas no APK
+- Vulkan na Adreno 730, com todos os recursos que o Xenos exige
+- A reserva de memória do guest — o mesmo espaço de endereçamento do console
+- A ISO montada direto, sem precisar extrair nada
+- **Controles do Xbox 360 desenhados na tela**, com analógicos, direcional,
+  gatilhos e o losango A/B/X/Y
+- Um menu que abre antes do jogo, onde você escolhe a ISO pelo seletor de
+  arquivos do Android
+
+### Ainda não tem release
+
+O port está em desenvolvimento e ainda não há APK publicado. Quando sair, vai
+funcionar como no PC: você aponta para a ISO do **seu** disco e joga.
+
+---
+
 ## Gameplay em 2K
 
 **UFC Undisputed 3 está jogável no PC, em 2560x1440, por meio desta recompilação.**
@@ -286,6 +333,17 @@ As correções dos três primeiros, mais esta última, estão prontas para virar
 - [ ] Resolver as jump tables (`[[switch_tables]]`) — 1.067 já extraídas
 - [ ] Validar a correção nº 4 do SDK num build separado
 - [ ] Abrir os PRs no ReXGlue SDK
+
+**Android**
+
+- [x] Traduzir e compilar o jogo inteiro para ARM64
+- [x] Runtime, Vulkan e memória do guest de pé no aparelho
+- [x] Montar a ISO direto, sem extrair
+- [x] Tela cheia e orientação travada em paisagem
+- [x] Controles do Xbox 360 na tela
+- [x] Menu com seletor de arquivos para a ISO
+- [ ] Aquecer o cache de shader antes da primeira partida
+- [ ] Release do APK
 
 ---
 
