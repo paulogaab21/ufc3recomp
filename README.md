@@ -44,11 +44,11 @@ da filtragem, não da taxa de atualização.
 
 **UFC Undisputed 3 já está rodando em celular — nativo, sem emulação.**
 
-[![UFC Undisputed 3 rodando no Galaxy S22](https://i.ytimg.com/vi/NKbL0ufgN_A/maxresdefault.jpg)](https://www.youtube.com/shorts/NKbL0ufgN_A)
+[![UFC Undisputed 3 rodando no Galaxy S22](https://i.ytimg.com/vi/1HvpdcUi4Qg/maxresdefault.jpg)](https://www.youtube.com/watch?v=1HvpdcUi4Qg)
 
 *Gravado num Galaxy S22. Clique para assistir.*
 
-[▶ Assista no YouTube](https://www.youtube.com/shorts/NKbL0ufgN_A)
+[▶ Assista no YouTube](https://www.youtube.com/watch?v=1HvpdcUi4Qg)
 
 O mesmo caminho do PC, do começo ao fim: o `default.xex` é traduzido de PowerPC
 para C++ e compilado para **ARM64 nativo**. Não há emulador, não há camada de
