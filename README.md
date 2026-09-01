@@ -43,22 +43,6 @@ vira instruções ARM de verdade e roda direto no Snapdragon.
 O desempenho é ótimo: o jogo entrega a taxa de quadros do console, em tela cheia
 e na resolução nativa do aparelho.
 
-### O que já funciona
-
-- As quatro bibliotecas nativas compiladas para ARM64 e empacotadas no APK
-- Vulkan na Adreno 730, com todos os recursos que o Xenos exige
-- A reserva de memória do guest — o mesmo espaço de endereçamento do console
-- A ISO montada direto, sem precisar extrair nada
-- **Controles do Xbox 360 desenhados na tela**, com analógicos, direcional,
-  gatilhos e o losango A/B/X/Y
-- Um menu que abre antes do jogo, onde você escolhe a ISO pelo seletor de
-  arquivos do Android
-
-### Ainda não tem release
-
-O port está em desenvolvimento e ainda não há APK publicado. Quando sair, vai
-funcionar como no PC: você aponta para a ISO do **seu** disco e joga.
-
 ---
 
 ## Gameplay em 2K
