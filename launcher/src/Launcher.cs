@@ -49,6 +49,10 @@ internal sealed class Cfg {
     // Aqui isso nao vira "menos fps": a simulacao avanca um passo por vblank a
     // 60 Hz, entao GPU sobrecarregada faz o jogo rodar em camera lenta.
     public int    Superamostragem = 1;
+    // Marca que esta configuracao foi escrita DEPOIS de o supersampling voltar a
+    // ser escolhivel. Ver a migracao em Carregar: sem isso, um valor salvo antes
+    // da trava reviveria sozinho.
+    public bool   SuperamostragemLiberada = false;
     // 0 = Medio, 1 = Alto, 2 = Maximo. Define anisotropico, cache de textura e
     // precisao de profundidade. Supersampling NAO entra: fica fixo em 1x.
     public int    Qualidade = 1;
@@ -69,6 +73,33 @@ internal sealed class Cfg {
     public int    CacheTexturaSoft = 1024;   // MB (padrao do SDK: 384)
     public int    CacheTexturaHard = 2048;   // MB (padrao do SDK: 768)
 
+    // ---------------------------------------------------------------------
+    //  Renderizador nativo
+    //
+    //  O caminho normal desenha por emulacao: o jogo escreve pacotes PM4 e o
+    //  emulador reconstroi o quadro traduzindo estado do Xenos. O caminho
+    //  nativo le as estruturas do proprio jogo e desenha direto por D3D12.
+    //
+    //  A cena ainda NAO passa por ele -- esta em construcao. O que ja funciona
+    //  e' o pos-processamento sobre o quadro pronto, que e' de onde sai o fundo
+    //  desfocado do menu.
+    // ---------------------------------------------------------------------
+    public int    Nitidez = 55;            // por cento, 0 desliga
+    public bool   MenuDesfoque = true;
+    public int    MenuDesfoqueForca = 100;   // por cento
+
+    // Cadencia de apresentacao.
+    //
+    //  Isto nao e' so suavidade: a simulacao avanca um passo por vblank, e sem
+    //  vsync o vblank do guest ia a 1000 Hz fixos -- o jogo corria cerca de 16
+    //  vezes mais rapido. Com o limitador ligado, o vblank passa a seguir a
+    //  taxa daqui, e desligar o vsync deixa de quebrar a velocidade do jogo.
+    public bool   LimitadorQuadros = false;
+    public double LimitadorFps = 120.0;
+    // Ritmo por relogio do host com espera precisa, em vez de sondar o relogio
+    // do guest em laco. Ajuda quem tem monitor de taxa variavel.
+    public bool   RitmoRelogioHost = false;
+
     // Formato proprio, linha "chave=valor". Evita dependencia de serializador e
     // e' trivial de validar.
     public static Cfg Carregar(string caminho) {
@@ -87,6 +118,7 @@ internal sealed class Cfg {
                 case "Monitor": int.TryParse(v, out c.Monitor); break;
                 case "TaxaHz": double.TryParse(v, NumberStyles.Any, ci, out c.TaxaHz); break;
                 case "Superamostragem": int.TryParse(v, out c.Superamostragem); break;
+                case "SuperamostragemLiberada": c.SuperamostragemLiberada = v == "1"; break;
                 case "Qualidade": int.TryParse(v, out c.Qualidade); break;
                 case "DrawScale": int.TryParse(v, out c.DrawScale); break;
                 case "ShaderAsync": c.ShaderAsync = v == "1"; break;
@@ -97,7 +129,32 @@ internal sealed class Cfg {
                 case "Sensibilidade": double.TryParse(v, NumberStyles.Any, ci, out c.Sensibilidade); break;
                 case "CacheTexturaSoft": int.TryParse(v, out c.CacheTexturaSoft); break;
                 case "CacheTexturaHard": int.TryParse(v, out c.CacheTexturaHard); break;
+                case "Nitidez": int.TryParse(v, out c.Nitidez); break;
+                case "MenuDesfoque": c.MenuDesfoque = v == "1"; break;
+                case "MenuDesfoqueForca": int.TryParse(v, out c.MenuDesfoqueForca); break;
+                case "LimitadorQuadros": c.LimitadorQuadros = v == "1"; break;
+                case "LimitadorFps": double.TryParse(v, NumberStyles.Any, ci, out c.LimitadorFps); break;
+                case "RitmoRelogioHost": c.RitmoRelogioHost = v == "1"; break;
             }
+        }
+
+        // Migracao de uma so vez.
+        //
+        // O supersampling ja foi escolhivel, depois ficou TRAVADO em 1x por um
+        // tempo, e agora voltou a ser escolhivel. Quem tinha 2x salvo daquela
+        // epoca carregava um valor que ficou dormente durante a trava -- e que
+        // acordaria sozinho ao destravar, sem a pessoa ter escolhido nada.
+        //
+        // O efeito nao seria obvio: nesta recompilacao a simulacao avanca um
+        // passo por vblank, entao GPU saturada nao derruba os quadros por
+        // segundo, derruba a VELOCIDADE do jogo. A pessoa veria o jogo lento
+        // depois de uma atualizacao e nao teria como ligar uma coisa a outra.
+        //
+        // Entao uma configuracao sem a marca volta para 1x. Quem quiser 2x
+        // escolhe de novo, agora com o aviso ao lado.
+        if (!c.SuperamostragemLiberada && c.Superamostragem != 1) {
+            c.Superamostragem = 1;
+            c.DrawScale = 1;
         }
         return c;
     }
@@ -112,6 +169,7 @@ internal sealed class Cfg {
         sb.AppendLine("Monitor=" + Monitor);
         sb.AppendLine("TaxaHz=" + TaxaHz.ToString(ci));
         sb.AppendLine("Superamostragem=" + Superamostragem);
+        sb.AppendLine("SuperamostragemLiberada=1");
         sb.AppendLine("Qualidade=" + Qualidade);
         sb.AppendLine("DrawScale=" + DrawScale);
         sb.AppendLine("ShaderAsync=" + (ShaderAsync ? "1" : "0"));
@@ -122,6 +180,12 @@ internal sealed class Cfg {
         sb.AppendLine("Sensibilidade=" + Sensibilidade.ToString(ci));
         sb.AppendLine("CacheTexturaSoft=" + CacheTexturaSoft);
         sb.AppendLine("CacheTexturaHard=" + CacheTexturaHard);
+        sb.AppendLine("Nitidez=" + Nitidez);
+        sb.AppendLine("MenuDesfoque=" + (MenuDesfoque ? "1" : "0"));
+        sb.AppendLine("MenuDesfoqueForca=" + MenuDesfoqueForca);
+        sb.AppendLine("LimitadorQuadros=" + (LimitadorQuadros ? "1" : "0"));
+        sb.AppendLine("LimitadorFps=" + LimitadorFps.ToString(ci));
+        sb.AppendLine("RitmoRelogioHost=" + (RitmoRelogioHost ? "1" : "0"));
         File.WriteAllText(caminho, sb.ToString(), Encoding.UTF8);
     }
 
@@ -154,11 +218,37 @@ internal sealed class Cfg {
     /// Trava em 1 ou 2. Nunca escala nao-quadrada, nunca acima de 2.
     // Sempre 1. Um ufc3.toml de uma versao anterior pode trazer 2 gravado, e
     // sem esta trava ele voltaria a valer sem passar por nenhuma tela.
+    // Travado em 1x, e nao e' timidez: nesta recompilacao a simulacao avanca um
+    // passo por vblank do guest, entao GPU sobrecarregada NAO derruba os quadros
+    // por segundo -- derruba a VELOCIDADE do jogo.
+    //
+    // Isso foi medido de novo, e caro: liberar a escolha fez o jogo cair de 60
+    // para 35 fps numa luta, com a agravante de que o valor 2x estava salvo de
+    // uma versao antiga e voltou a valer sozinho, sem ninguem escolher. A pessoa
+    // ve o jogo lento depois de uma atualizacao e nao tem como ligar uma coisa a
+    // outra.
+    //
+    // Uma opcao cujo efeito o jogador nao consegue interpretar nao e' opcao: e'
+    // armadilha. Fica em 1x.
     public int DrawEfetivo { get { return 1; } }
 
     // Escreve o ufc3.toml lido pelo runtime. Chave = nome do cvar.
     // A tela de opcoes dentro do jogo usa este mesmo arquivo.
     public string PastaDados = "";
+
+    // Desligar o vsync sem limitador e' a combinacao que poe o vblank do guest a
+    // 1000 Hz e faz o jogo correr ~16x mais rapido. Em vez de deixar o jogador
+    // cair nisso, o limitador entra sozinho quando o vsync sai.
+    public bool LimitadorEfetivo { get { return LimitadorQuadros || !VSync; } }
+
+    // Sem escolha explicita do jogador, segue a taxa do monitor: e' a cadencia
+    // que o jogo espera, e a que mantem a velocidade certa.
+    public double LimitadorFpsEfetivo {
+        get {
+            if (LimitadorQuadros && LimitadorFps >= 1.0) return LimitadorFps;
+            return TaxaHz >= 1.0 ? TaxaHz : 60.0;
+        }
+    }
 
     public void EscreverToml(string caminho) {
         var ci = CultureInfo.InvariantCulture;
@@ -210,6 +300,37 @@ internal sealed class Cfg {
         s.AppendLine("# \"some\" copia so quando o cache erra, que e' a variante barata; \"full\"");
         s.AppendLine("# copia sempre e sincroniza, corrigindo mais casos e custando bem mais.");
         s.AppendLine("readback_resolve = \"some\"");
+        s.AppendLine();
+        s.AppendLine("# --- Renderizador nativo ---");
+        s.AppendLine("#");
+        s.AppendLine("# O caminho normal desenha por emulacao: o jogo escreve pacotes PM4 e o");
+        s.AppendLine("# emulador reconstroi o quadro traduzindo estado do Xenos. O caminho");
+        s.AppendLine("# nativo le as estruturas do proprio jogo e desenha direto por D3D12.");
+        s.AppendLine("#");
+        s.AppendLine("# A CENA ainda nao passa por ele -- isso e trabalho em andamento. A");
+        s.AppendLine("# IMAGEM FINAL ja passa, em todo quadro: e de la que saem a nitidez e o");
+        s.AppendLine("# fundo desfocado do menu.");
+        s.AppendLine("#");
+        s.AppendLine("# Nao ha chave para desligar. O que se escolhe e a intensidade -- zero");
+        s.AppendLine("# inclusive -- nao se o renderizador participa.");
+        s.AppendLine("ufc3_nitidez = " + Nitidez);
+        s.AppendLine("ufc3_menu_desfoque = " + (MenuDesfoque ? "true" : "false"));
+        s.AppendLine("ufc3_menu_desfoque_forca = " + MenuDesfoqueForca);
+        s.AppendLine();
+        s.AppendLine("# --- Cadencia de apresentacao ---");
+        s.AppendLine("#");
+        s.AppendLine("# Aqui nao se decide so a suavidade: a simulacao avanca um passo por");
+        s.AppendLine("# vblank do guest. Sem vsync esse vblank ia a 1000 Hz FIXOS, e o jogo");
+        s.AppendLine("# corria cerca de 16 vezes mais rapido -- era por isso que desligar o");
+        s.AppendLine("# vsync quebrava o jogo em vez de apenas soltar os quadros.");
+        s.AppendLine("#");
+        s.AppendLine("# Com o limitador ligado, o vblank do guest passa a seguir a taxa abaixo.");
+        s.AppendLine("d3d12_present_frame_limiter = " + (LimitadorEfetivo ? "true" : "false"));
+        s.AppendLine("d3d12_present_frame_limiter_fps = " + LimitadorFpsEfetivo.ToString("0.0", ci));
+        s.AppendLine("vblank_no_vsync_use_present_limiter = true");
+        s.AppendLine("# Ritmo por relogio do host com espera precisa, em vez de sondar o");
+        s.AppendLine("# relogio do guest em laco. Ajuda em monitores de taxa variavel.");
+        s.AppendLine("vblank_host_clock_pacing = " + (RitmoRelogioHost ? "true" : "false"));
         s.AppendLine();
         s.AppendLine("# --- Idioma / regiao ---");
         s.AppendLine("user_language = " + Idioma);
@@ -564,10 +685,19 @@ internal sealed class Janela {
         // Uma opcao que so tem um jeito certo de ser usada nao e' opcao. Fica a
         // caixa, desabilitada, mostrando a resolucao em que o jogo desenha --
         // que continua sendo informacao util.
+        // Mostrada, mas nao escolhivel: a resolucao de desenho continua sendo
+        // informacao util, e travar a caixa diz mais do que esconde-la.
         var cbDraw = (ComboBox)Achar("CbDraw");
-        cbDraw.Items.Add("1x  —  1280x720 (nativo do console)");
+        cbDraw.Items.Add("1x  \u2014  1280x720 (nativo do console)");
         cbDraw.IsEnabled = false;
         cbDraw.SelectionChanged += (a, b) => AtualizarDicaDraw();
+
+        ((Slider)Achar("SldNitidez")).ValueChanged += (a, b) => AtualizarDicaNitidez();
+        ((Slider)Achar("SldDesfoque")).ValueChanged += (a, b) => AtualizarDicaDesfoque();
+        ((CheckBox)Achar("ChkLimitador")).Checked += (a, b) => AtualizarDicaLimitador();
+        ((CheckBox)Achar("ChkLimitador")).Unchecked += (a, b) => AtualizarDicaLimitador();
+        ((CheckBox)Achar("ChkVSync")).Checked += (a, b) => AtualizarDicaLimitador();
+        ((CheckBox)Achar("ChkVSync")).Unchecked += (a, b) => AtualizarDicaLimitador();
 
         var cbQual = (ComboBox)Achar("CbQualidade");
         foreach (var pr in Cfg.Presets) cbQual.Items.Add(pr.Nome);
@@ -686,6 +816,16 @@ internal sealed class Janela {
         ((CheckBox)Achar("ChkMudo")).IsChecked = _cfg.Mudo;
         ((CheckBox)Achar("ChkTecMouse")).IsChecked = _cfg.TecladoMouse;
         ((Slider)Achar("SldSens")).Value = _cfg.Sensibilidade;
+        ((CheckBox)Achar("ChkMenuDesfoque")).IsChecked = _cfg.MenuDesfoque;
+        ((Slider)Achar("SldNitidez")).Value = _cfg.Nitidez;
+        ((Slider)Achar("SldDesfoque")).Value = _cfg.MenuDesfoqueForca;
+        ((CheckBox)Achar("ChkLimitador")).IsChecked = _cfg.LimitadorQuadros;
+        ((TextBox)Achar("TxtLimitadorFps")).Text =
+            _cfg.LimitadorFps.ToString(CultureInfo.InvariantCulture);
+        ((CheckBox)Achar("ChkRitmoHost")).IsChecked = _cfg.RitmoRelogioHost;
+        AtualizarDicaNitidez();
+        AtualizarDicaDesfoque();
+        AtualizarDicaLimitador();
     }
 
     void UIParaConfig() {
@@ -695,6 +835,7 @@ internal sealed class Janela {
         _cfg.TelaCheia = ((CheckBox)Achar("ChkTelaCheia")).IsChecked == true;
         _cfg.VSync = ((CheckBox)Achar("ChkVSync")).IsChecked == true;
         double hz; if (double.TryParse(((TextBox)Achar("TxtHz")).Text, NumberStyles.Any, ci, out hz)) _cfg.TaxaHz = hz;
+        _cfg.Superamostragem = 1;
         _cfg.DrawScale = 1;
         int q = ((ComboBox)Achar("CbQualidade")).SelectedIndex;
         _cfg.Qualidade = (q >= 0 && q <= 2) ? q : 1;
@@ -703,16 +844,74 @@ internal sealed class Janela {
         _cfg.Mudo = ((CheckBox)Achar("ChkMudo")).IsChecked == true;
         _cfg.TecladoMouse = ((CheckBox)Achar("ChkTecMouse")).IsChecked == true;
         _cfg.Sensibilidade = ((Slider)Achar("SldSens")).Value;
+        _cfg.MenuDesfoque = ((CheckBox)Achar("ChkMenuDesfoque")).IsChecked == true;
+        _cfg.Nitidez = (int)Math.Round(((Slider)Achar("SldNitidez")).Value);
+        _cfg.MenuDesfoqueForca = (int)Math.Round(((Slider)Achar("SldDesfoque")).Value);
+        _cfg.LimitadorQuadros = ((CheckBox)Achar("ChkLimitador")).IsChecked == true;
+        double fps;
+        if (double.TryParse(((TextBox)Achar("TxtLimitadorFps")).Text, NumberStyles.Any, ci, out fps)
+            && fps >= 1.0 && fps <= 1000.0) {
+            _cfg.LimitadorFps = fps;
+        }
+        _cfg.RitmoRelogioHost = ((CheckBox)Achar("ChkRitmoHost")).IsChecked == true;
+    }
+
+    void AtualizarDicaNitidez() {
+        var s = Achar("SldNitidez") as Slider;
+        var t = Achar("TxtNitidezDica") as TextBlock;
+        if (s == null || t == null) return;
+        int v = (int)Math.Round(s.Value);
+        t.Text = v == 0 ? "0% \u2014 desligada, imagem como sai da emula\u00e7\u00e3o"
+               : v <= 35 ? v + "% \u2014 discreta"
+               : v <= 70 ? v + "%"
+               : v + "% \u2014 forte, pode marcar as bordas";
+    }
+
+    void AtualizarDicaDesfoque() {
+        var s = Achar("SldDesfoque") as Slider;
+        var t = Achar("TxtDesfoqueDica") as TextBlock;
+        if (s == null || t == null) return;
+        int v = (int)Math.Round(s.Value);
+        t.Text = v == 0 ? "0% — só escurece, sem desfocar"
+               : v <= 60 ? v + "% — desfoque leve"
+               : v <= 150 ? v + "%"
+               : v + "% — bem forte";
+    }
+
+    // O aviso muda de acordo com o VSync porque a combinacao importa: sem vsync
+    // e sem limitador, o vblank do guest vai a 1000 Hz e o jogo corre rapido
+    // demais. Nesse caso o launcher liga o limitador sozinho, e a dica diz isso.
+    void AtualizarDicaLimitador() {
+        var chk = Achar("ChkLimitador") as CheckBox;
+        var t = Achar("TxtLimitadorDica") as TextBlock;
+        var vsync = Achar("ChkVSync") as CheckBox;
+        var caixa = Achar("TxtLimitadorFps") as TextBox;
+        if (chk == null || t == null || vsync == null) return;
+
+        bool semVSync = vsync.IsChecked != true;
+        bool ligado = chk.IsChecked == true;
+        if (caixa != null) caixa.IsEnabled = ligado;
+
+        if (semVSync && !ligado) {
+            t.Text = "Com o VSync desligado o limitador entra sozinho, na taxa do monitor. " +
+                     "Sem ele a simulação do jogo dispararia para 1000 Hz.";
+        } else if (ligado) {
+            t.Text = "Entrega os quadros num compasso regular, em vez de assim que ficam prontos. " +
+                     "A simulação segue essa mesma taxa.";
+        } else {
+            t.Text = "Entrega os quadros num compasso regular, em vez de assim que ficam prontos.";
+        }
     }
 
     void AtualizarDicaDraw() {
         var cb = Achar("CbDraw") as ComboBox;
         var t = Achar("TxtDrawDica") as TextBlock;
         if (cb == null || t == null) return;
-        t.Text = "O jogo desenha a 720p e a imagem é ampliada para a resolução da tela — " +
-                 "o nativo do Xbox 360. Resoluções maiores foram removidas: elas não " +
-                 "derrubam os quadros por segundo, derrubam a velocidade do jogo, porque a " +
-                 "simulação avança um passo por vblank.";
+        t.Text = "O jogo desenha a 720p, o nativo do Xbox 360, e a imagem é ampliada para a " +
+                 "resolução da tela — a nitidez do renderizador nativo recupera boa parte da " +
+                 "definição. Resoluções maiores ficaram travadas: elas não derrubam os quadros " +
+                 "por segundo, derrubam a velocidade do jogo, porque a simulação avança um " +
+                 "passo por vblank.";
     }
 
     void AtualizarDicaQualidade() {

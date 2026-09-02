@@ -550,6 +550,37 @@
               </StackPanel>
 
               <StackPanel Grid.Column="2">
+                <TextBlock Text="RENDERIZADOR NATIVO" Style="{StaticResource Titulo}"/>
+                <TextBlock Style="{StaticResource Dica}" Margin="0,0,0,8"
+                           Text="A imagem final passa por ele em todo quadro, desenhada pela sua placa em vez de pela GPU emulada."/>
+                <TextBlock Text="Nitidez da imagem" Style="{StaticResource Rotulo}" Margin="22,10,0,6"/>
+                <Slider x:Name="SldNitidez" Minimum="0" Maximum="100" TickFrequency="5"
+                        IsSnapToTickEnabled="True" Width="230" HorizontalAlignment="Left" Margin="22,0,0,0"/>
+                <TextBlock x:Name="TxtNitidezDica" Style="{StaticResource Dica}" Margin="22,4,0,0"
+                           Text="55%"/>
+                <TextBlock Style="{StaticResource Dica}" Margin="22,4,0,0"
+                           Text="Adaptativa ao contraste: recupera detalhe fino sem criar auréola nas bordas nem realçar ruído nas áreas lisas."/>
+
+                <CheckBox x:Name="ChkMenuDesfoque" Content="Desfocar o jogo atrás do menu" Margin="0,9,0,0"/>
+                <TextBlock Style="{StaticResource Dica}" Margin="22,0,0,0"
+                           Text="Deixa o texto do menu legível sobre qualquer cena. É o primeiro desenho nativo que já está valendo."/>
+                <TextBlock Text="Intensidade do desfoque" Style="{StaticResource Rotulo}" Margin="22,10,0,6"/>
+                <Slider x:Name="SldDesfoque" Minimum="0" Maximum="300" TickFrequency="10"
+                        IsSnapToTickEnabled="True" Width="230" HorizontalAlignment="Left" Margin="22,0,0,0"/>
+                <TextBlock x:Name="TxtDesfoqueDica" Style="{StaticResource Dica}" Margin="22,4,0,0"
+                           Text="100%"/>
+
+                <TextBlock Text="CADÊNCIA DE QUADROS" Style="{StaticResource Titulo}"/>
+                <CheckBox x:Name="ChkLimitador" Content="Limitar a taxa de apresentação"/>
+                <TextBlock x:Name="TxtLimitadorDica" Style="{StaticResource Dica}" Margin="22,0,0,0"
+                           Text="Entrega os quadros num compasso regular, em vez de assim que ficam prontos."/>
+                <TextBlock Text="Quadros por segundo" Style="{StaticResource Rotulo}" Margin="22,10,0,4"/>
+                <TextBox x:Name="TxtLimitadorFps" Style="{StaticResource CaixaTexto}" Height="30"
+                         Width="230" HorizontalAlignment="Left" Margin="22,0,0,0"/>
+                <CheckBox x:Name="ChkRitmoHost" Content="Ritmo pelo relógio do sistema" Margin="0,10,0,0"/>
+                <TextBlock Style="{StaticResource Dica}" Margin="22,0,0,0"
+                           Text="Espera precisa em vez de consultar o relógio em laço. Ajuda em monitores G-Sync ou FreeSync."/>
+
                 <TextBlock Text="IDIOMA" Style="{StaticResource Titulo}"/>
                 <ComboBox x:Name="CbIdioma"/>
                 <TextBlock Style="{StaticResource Dica}" Margin="0,5,0,0"

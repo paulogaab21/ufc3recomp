@@ -12,6 +12,10 @@ include(generated/rexglue.cmake)
 
 set(UFC3_SOURCES
     src/main.cpp
+    src/ufc3_render_nativo.cpp
+    src/ufc3_captura_desenho.cpp
+    src/ufc3_estado_desenho.cpp
+    src/ufc3_extrai_cena.cpp
 )
 
 if(WIN32)
@@ -26,6 +30,12 @@ if(WIN32)
 
     # WIN32 no add_executable: subsistema grafico, sem console atras da janela.
     add_executable(ufc3 WIN32 ${UFC3_SOURCES})
+elseif(ANDROID)
+    # No Android nao existe processo do jogo: quem roda e a Activity do SDL,
+    # que carrega uma biblioteca por System.loadLibrary e chama SDL_main dentro
+    # dela. O alvo precisa sair como libufc3.so, nao como executavel.
+    add_library(ufc3 SHARED ${UFC3_SOURCES})
+    set_target_properties(ufc3 PROPERTIES PREFIX "lib" OUTPUT_NAME "ufc3")
 else()
     add_executable(ufc3 ${UFC3_SOURCES})
 endif()

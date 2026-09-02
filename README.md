@@ -1,367 +1,326 @@
 # UFC 3 Recomp
 
-Recompilação  de **UFC Undisputed 3** (Xbox 360) para PC, usando o
-[ReXGlue SDK](https://github.com/rexglue/rexglue-sdk).
+An unofficial native recompilation of the Xbox 360 version of **UFC Undisputed 3**
+for PC, built on the [ReXGlue SDK](https://github.com/rexglue/rexglue-sdk).
 
-Não é emulação. O executável do jogo é traduzido de PowerPC para C++ e depois
-compilado como um programa nativo de PC — o resultado é um `.exe` que roda
-direto no processador, sem interpretar nada em tempo real.
+This is not emulation. The game executable is translated from PowerPC to C++ and
+then compiled as a native PC program — the result is an `.exe` that runs directly
+on your processor, with nothing interpreted at runtime.
 
----
+The project does not include UFC Undisputed 3 retail game files. To run or build
+it, you must provide files from your own legally obtained Xbox 360 copy.
 
-> ## ⚠️ Você precisa do seu próprio disco de UFC Undisputed 3
-> **Este projeto não distribui o jogo.**
+Gameplay (click to watch on YouTube):
 
----
-
-## Gameplay em 2K
-
-**UFC Undisputed 3 está jogável no PC, em 2560x1440, por meio desta recompilação.**
-
-[![UFC Undisputed 3 — jogável em 2K a 144 FPS](https://i.ytimg.com/vi/hUpWKWqRkJ8/maxresdefault.jpg)](https://www.youtube.com/watch?v=5cQYiwqAFsc)
-
-*Imagem de UFC Undisputed 3 — clique para assistir ao vídeo do projeto.*
-
-[▶ Assista ao gameplay no YouTube — 2K a 144 FPS](https://www.youtube.com/watch?v=5cQYiwqAFsc)
-
-### Uma palavra sobre o número de quadros
-
-Esse vídeo foi gravado com o modo de vídeo em 144 Hz, e depois descobrimos o que
-esse número significa **neste motor**, o que vale registrar.
-
-O runtime deriva o vblank do guest de `video_mode_refresh_rate`, e o jogo avança
-**um passo de simulação por vblank**. A 144 Hz a simulação anda 2,4 vezes mais
-rápido que no console: a imagem fica fluida, mas o jogo corre acelerado. Subir
-para 244 não seria uma melhoria — seria o jogo em câmera rápida.
-
-Então o número que importa aqui não é o de quadros por segundo, é o do vblank:
-**60 Hz é a velocidade correta**, e é o padrão. O ganho de PC vem da resolução e
-da filtragem, não da taxa de atualização.
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=5cQYiwqAFsc">
+    <img src="https://i.ytimg.com/vi/hUpWKWqRkJ8/maxresdefault.jpg" alt="UFC Undisputed 3 recompiled — playable at 2K" width="480">
+  </a>
+</p>
 
 ---
 
-## 📱 A versão Android está chegando
+## How Do I Play?
 
-**UFC Undisputed 3 já está rodando em celular — nativo, sem emulação.**
+You do not need to compile anything. The [release](../../releases/latest) ships a
+ready executable.
 
-[![UFC Undisputed 3 rodando no Galaxy S22](https://i.ytimg.com/vi/1HvpdcUi4Qg/maxresdefault.jpg)](https://www.youtube.com/watch?v=1HvpdcUi4Qg)
+1. Download and extract the release
+2. Run **UFC3 Launcher.exe**
+3. Point it at the ISO of your own disc, or at an already-extracted folder
+4. Click **Extract and play**
 
-*Gravado num Galaxy S22. Clique para assistir.*
+The launcher reads the XEX header and checks the title ID (`5451087D`) before
+going any further; if you point it at a different game, it tells you which one it
+found.
 
-[▶ Assista no YouTube](https://www.youtube.com/watch?v=1HvpdcUi4Qg)
-
-O mesmo caminho do PC, do começo ao fim: o `default.xex` é traduzido de PowerPC
-para C++ e compilado para **ARM64 nativo**. Não há emulador, não há camada de
-tradução de instruções, não há Box64 nem nada parecido no meio — o código do jogo
-vira instruções ARM de verdade e roda direto no Snapdragon.
-
-### Rodando no Galaxy S22
-
-| | |
-|---|---|
-| Aparelho | Galaxy S22 (Snapdragon 8 Gen 1, Adreno 730) |
-| Sistema | Android 16, arm64-v8a |
-| Resolução | 2340×1080, tela cheia |
-| Gráficos | Vulkan 1.4 |
-| Menus | **60 fps** |
-| Luta | **30 fps** — a mesma taxa do Xbox 360 original |
-
-O desempenho é ótimo: o jogo entrega a taxa de quadros do console, em tela cheia
-e na resolução nativa do aparelho.
-
-O APK ainda não saiu. **No PC o jogo já está jogável do começo ao fim** — é só
-baixar a [release](../../releases/latest) e apontar o launcher para a ISO do seu
-disco.
+Only Windows x64 is tested. `CMakePresets.json` also lists Linux, macOS and
+ARM64 — none of those have been exercised here, so treat them as a starting
+point, not as support.
 
 ---
 
-## Em que pé está
+## Frame rate, and why 60 Hz is the right number
 
-**O jogo está jogável do começo ao fim, e bonito.**
+Worth stating up front, because it is counterintuitive and it will save you from
+a bad setting.
 
-Roda a 2560x1440 com filtragem anisotrópica 16x, cache de textura ampliado e
-profundidade arredondada — o resultado é bem mais nítido do que o console
-entregava, sem o cintilar de sombra que o original tinha. Menus, seleção de
-lutador, entrada no octógono, luta completa com HUD, criação de lutador e saves
-de carreira: tudo funciona.
+The runtime derives the guest vblank from `video_mode_refresh_rate`, and this
+game advances **one simulation step per vblank**. At 144 Hz the simulation runs
+2.4x faster than on console: the image is smooth, but the game runs fast. Raising
+it further would not be an improvement — it would be the game in fast-forward.
 
-E não é preciso compilar nada para jogar. A [release](../../releases/latest) traz
-o executável pronto; você aponta o launcher para a ISO do seu disco e joga.
+The same mechanism has a second consequence. A saturated GPU does **not** lower
+your frame rate here; it lowers the **speed of the game**. That is why render
+supersampling is locked at 1x: measured on an RTX 3060 Ti during a fight, 1x
+keeps the GPU around 25% while 2x pushes it to 98%, and the game slows down. An
+option whose effect a player cannot interpret is not an option, it is a trap.
 
-O que está montado por baixo:
-
-- O `default.xex` é traduzido inteiro para C++ — 569 arquivos, 295 MB de código
-- Isso compila e linka num executável nativo de 93 MB
-- **66.157 funções recompiladas** registradas na tabela de funções
-- Imports do kernel do Xbox 360 resolvidos: 101 do `xam`, 184 do `xboxkrnl`
-- Runtime completo no ar: memória do guest, SDL, entrada, áudio com as threads
-  do decodificador XMA, sistema de arquivos virtual montando `game:` e `d:`
-- Codegen sem nenhum aviso — o manifesto cobre todas as funções que o scanner
-  não alcança sozinho
-
-O trabalho agora é estabilidade e os cantos menos percorridos do jogo.
+So the number that matters is not frames per second, it is the vblank: **60 Hz is
+the correct speed**, and it is the default. The PC gain comes from resolution and
+filtering, not from refresh rate.
 
 ---
 
-## Como isso evoluiu
+## Native Renderer
 
-Vale registrar o caminho, porque quase nada dele foi o que eu esperava no
-começo.
+**Status: foundation in place, scene rendering not implemented.**
 
-**O gargalo nunca foi gráfico.** É achar onde cada função começa e termina
-dentro do executável do console. Essa é a seção seguinte, e é o coração do
-projeto.
+The long-term goal is the one skate3recomp reached: draw the game directly
+through Direct3D 12 by reading the game's own structures, instead of emulating
+the Xbox 360 GPU. That is where real visual gains live — MSAA, soft shadows,
+ambient occlusion — because they require replacing the console's shading rather
+than reproducing it.
 
-**O manifesto encolheu para funcionar.** Uma tentativa de resolver na força
-bruta gerou 4.751 entradas automáticas e produziu 2.919 falhas latentes. A
-medição mostrou o oposto do esperado: 8 entradas conferidas à mão davam zero
-avisos. Hoje são **66 entradas, todas verificadas uma a uma** — e o codegen sai
-limpo. Nesse tipo de trabalho, quantidade não é progresso.
+What actually ships today:
 
-**Descobrimos que o motor amarra simulação a vblank.** Foi o que explicou o
-"jogo rápido demais" e, junto, por que aumentar o supersampling derruba a
-*velocidade* em vez dos fps: a GPU satura, os vblanks atrasam, e a simulação
-anda menos. Por isso o padrão é 1x e 60 Hz.
+- A native render hardware interface (Direct3D 12 and Vulkan) is integrated and
+  runs every frame, with its own pipelines, shaders, intermediate targets and
+  barriers.
+- It owns the **final image**: contrast-adaptive sharpening recovers definition
+  lost when the game's 1280x720 output is scaled to your display, and the
+  settings menu gets a blurred, darkened backdrop.
+- Emulated-pass suppression is wired, so the native path can take over passes one
+  at a time once it can draw them.
 
-**Escala não-quadrada quebra as texturas dos lutadores.** Testamos 2x1 para
-ganhar nitidez sem o custo de 2x2: as texturas dos personagens corrompem. O
-caminho está fechado, e os dois eixos precisam andar juntos.
+What does **not** ship yet: the scene itself. Every frame is still drawn by the
+emulated GPU path. The native renderer post-processes the finished image; it does
+not yet draw geometry.
 
-**Cinco defeitos do SDK apareceram** — três no build, um no codegen, um no
-caminho de saves. Estão descritos mais abaixo.
+Groundwork that is done and verified against the running game:
 
-**O launcher virou parte do projeto**, não um acessório: é ele que faz a ponte
-da ISO até o jogo aberto, sem exigir ferramenta nenhuma de quem só quer jogar.
+- The game's `D3DDevice` memory map, including the shader-constant shadows and
+  their dirty masks
+- The vertex shader microcode location
+- Confirmation that the SDK's Xenos shader translator can be reused, which
+  removes the hand-written shader port that dominated skate3recomp's effort
 
----
-
-## O launcher
-
-Um único executável, com a interface, as imagens e as fontes embutidas — não há
-arquivo solto para alguém alterar.
-
-- Aceita a ISO do seu disco ou uma pasta já extraída
-- Lê o cabeçalho do XEX e confere o title ID (`5451087D`) antes de seguir; se
-  você apontar outro jogo, ele diz qual encontrou
-- Ajusta resolução, supersampling, presets de qualidade, idioma e controles,
-  gravando tudo no mesmo `ufc3.toml` que a tela de opções do jogo usa
-- Funciona de dois jeitos, decididos por um único teste — existe um `ufc3.exe`
-  ao lado dele? Se sim, só extrai e joga. Se não, traduz e compila.
-
-O código está em [`launcher/`](launcher).
+Still missing: the pixel shader microcode field, the vertex declaration, the
+texture object layout, native render targets to replace EDRAM emulation, and the
+scene and material assembly on top.
 
 ---
 
-## Como funciona
+## The launcher
+
+A single executable, with its interface, images and fonts embedded — there is no
+loose file for anyone to tamper with.
+
+- Accepts your disc image or an already-extracted folder
+- Adjusts resolution, quality presets, language and controls, writing everything
+  to the same `ufc3.toml` the in-game settings screen uses
+- Works two ways, decided by a single test: is there a `ufc3.exe` next to it? If
+  so, extract and play. If not, translate and compile.
+
+Source in [`launcher/`](launcher).
+
+---
+
+## How it works
 
 ```
 default.xex  (PowerPC, big-endian, Xbox 360)
      |
-     |  rexglue codegen  — desmonta e traduz instrução por instrução
+     |  rexglue codegen  — disassembles and translates instruction by instruction
      v
 generated/default/*.cpp  (C++, ~295 MB)
      |
-     |  clang + o runtime do ReXGlue
+     |  clang + the ReXGlue runtime
      v
-ufc3.exe  (x86-64 nativo)
+ufc3.exe  (native x86-64)
 ```
 
-O ReXGlue entra com as duas metades: o **compilador**, que faz a tradução, e o
-**runtime**, que é um Xbox 360 reimplementado em C++ — kernel, GPU Xenos
-traduzida para D3D12, áudio, entrada, sistema de arquivos.
+ReXGlue provides both halves: the **compiler**, which does the translation, and
+the **runtime**, which is an Xbox 360 reimplemented in C++ — kernel, Xenos GPU
+translated to D3D12, audio, input, filesystem.
 
-O trabalho deste repositório é o que fica no meio: dizer ao recompilador onde
-cada função começa e termina, corrigir o que ele não descobre sozinho, e
-implementar o que o jogo espera do console e o runtime ainda não oferece.
+This repository is the part in the middle: telling the recompiler where each
+function begins and ends, correcting what it cannot discover on its own, and
+implementing what the game expects from the console that the runtime does not yet
+provide.
+
+Current state of the build:
+
+- The whole `default.xex` is translated to C++ — 569 files, 295 MB of code
+- That compiles and links into a 93 MB native executable
+- **66,157 recompiled functions** registered in the function table
+- Xbox 360 kernel imports resolved: 101 from `xam`, 184 from `xboxkrnl`
+- Codegen produces no warnings — the manifest covers every function the scanner
+  cannot reach by itself
 
 ---
 
-## O problema principal: achar os limites das funções
+## The core problem: finding function boundaries
 
-O recompilador descobre funções de dois jeitos: seguindo as chamadas (`bl`) a
-partir do ponto de entrada, e reconhecendo o prólogo — aquelas instruções que
-toda função normal executa ao entrar, salvando o endereço de retorno e
-reservando espaço na pilha.
+The recompiler discovers functions two ways: by following calls (`bl`) from the
+entry point, and by recognising the prologue — the instructions every normal
+function runs on entry, saving the return address and reserving stack space.
 
-Existe uma classe de função que escapa dos dois:
+One class of function escapes both:
 
-- **não tem prólogo** — é tão pequena que o compilador de 2011 não gerou um
-- **não é alvo de nenhum `bl`** — só é chamada indiretamente, por tabela de
-  construtores estáticos, vtable ou ponteiro de função
+- **no prologue** — it is small enough that the 2011 compiler did not emit one
+- **not the target of any `bl`** — it is only reached indirectly, through a static
+  constructor table, a vtable, or a function pointer
 
-E, pelo mesmo motivo (não mexe na pilha), ela também **não aparece na seção
-`.pdata`** do executável, que é o diretório de exception unwind. Confirmado na
-prática: das 47.145 funções que o `.pdata` lista, nenhuma cobre esses casos.
+And for the same reason (it never touches the stack), it does **not appear in the
+`.pdata` section** either, which is the exception-unwind directory. Confirmed in
+practice: of the 47,145 functions `.pdata` lists, none covers these cases.
 
-Quatro delas travavam a geração do código e foram corrigidas à mão:
+Four of them blocked code generation and were fixed by hand:
 
-| Endereço | O que é | Tamanho |
+| Address | What it is | Size |
 |---|---|---|
-| `0x82691B80` | função-folha cortada num tail-call | `0x78` |
-| `0x82F451D0` | thunk de vtable, alcançado só por `bctr` | `0x48` |
-| `0x8232F760` | adjustor thunk de herança múltipla | `0x8` |
-| `0x82314918` | getter-folha | `0x2C` |
+| `0x82691B80` | leaf function cut off at a tail call | `0x78` |
+| `0x82F451D0` | vtable thunk, reached only by `bctr` | `0x48` |
+| `0x8232F760` | multiple-inheritance adjustor thunk | `0x8` |
+| `0x82314918` | leaf getter | `0x2C` |
 
-Uma quinta (`0x831820A8`, um inicializador estático) só apareceu em runtime.
+A fifth (`0x831820A8`, a static initializer) only showed up at runtime.
 
-Resolver isso caso a caso não escala. Existe um detector em
-[`tools/find_orphans.py`](tools/find_orphans.py) que desmonta os 17 MB de código, cruza com as funções
-que o recompilador já conhece e procura código válido que não é alvo de nenhum
-branch direto. Ele acha o caso confirmado com o tamanho exato — mas a detecção
-de **fim** de função ainda é ingênua (para no primeiro terminador, e função
-real tem vários blocos internos), o que gera falso positivo em bloco de
-`switch`. Melhorar isso para seguir o fluxo de controle de verdade é
-provavelmente a contribuição mais valiosa que alguém pode fazer aqui.
+Solving these case by case does not scale. There is a detector in
+[`tools/find_orphans.py`](tools/find_orphans.py) that disassembles the 17 MB of
+code, cross-references the functions the recompiler already knows, and looks for
+valid code that is not the target of any direct branch. It finds the confirmed
+case with the exact size — but its **end**-of-function detection is still naive
+(it stops at the first terminator, and a real function has several internal
+blocks), which produces false positives on `switch` blocks. Improving that to
+follow control flow properly is probably the most valuable contribution anyone
+can make here.
 
 ---
 
-## Compilando por conta própria
+## Building from source
 
-Isto é para quem quer fazer a tradução na própria máquina. Para só jogar, use a
-[release](../../releases/latest) — ela não exige nenhuma ferramenta.
+This is for people who want to run the translation on their own machine. To just
+play, use the [release](../../releases/latest) — it needs no tools at all.
 
-Primeiro, extraia do seu disco:
+First, extract from your disc:
 
 ```
 assets/game/default.xex
 ```
 
-Sem esse arquivo não há o que recompilar.
+Without that file there is nothing to recompile.
 
-Só o preset **`win-amd64-relwithdebinfo`** foi testado. O `CMakePresets.json`
-vem do `rexglue init` e lista também Linux, macOS e ARM64 — nenhum desses foi
-exercitado aqui, então trate-os como ponto de partida, não como suporte.
-
-Depois: Clang 18+, CMake 3.25+, Ninja e o ReXGlue SDK. No Windows tudo isso, com
-exceção do SDK, vem junto com os **Build Tools da MSVC** — o Clang usa os headers
-e libs deles, e o link é feito no ABI da Microsoft. Não é preciso instalar cmake
-nem ninja à parte.
+Then: Clang 18+, CMake 3.25+, Ninja and the ReXGlue SDK. On Windows all of that
+except the SDK comes with the **MSVC Build Tools** — Clang uses their headers and
+libraries, and linking happens against the Microsoft ABI. You do not need to
+install cmake or ninja separately.
 
 ```bash
-# 1. traduz o XEX para C++
+# 1. translate the XEX to C++
 rexglue codegen ufc3_manifest.toml
 
-# 2. configura
-cmake --preset win-amd64-relwithdebinfo -DREXSDK_DIR=<caminho do rexglue-sdk>
+# 2. configure
+cmake --preset win-amd64-relwithdebinfo -DREXSDK_DIR=<path to rexglue-sdk>
 
-# 3. compila
+# 3. build
 cmake --build out/build/win-amd64-relwithdebinfo
 
-# 4. roda (apontando para a pasta do seu disco extraído)
-./out/build/win-amd64-relwithdebinfo/ufc3.exe --game_data_root "<pasta do jogo>"
+# 4. run (pointing at your extracted disc folder)
+./out/build/win-amd64-relwithdebinfo/ufc3.exe --game_data_root "<game folder>"
 ```
 
-Para investigar um crash, `--log_file <caminho> --log_verbose` mostra o boot
-inteiro passo a passo.
+To investigate a crash, `--log_file <path> --log_verbose` walks the whole boot
+step by step.
 
 ---
 
-## Achados que voltaram para o SDK
+## Findings sent back to the SDK
 
-Montar isso do zero no Windows revelou **seis** defeitos no ReXGlue SDK. Os
-três primeiros são da mesma família — **consumir o SDK pelo código-fonte, do
-jeito que o próprio `rexglue init` documenta, estava quebrado**:
+Building this from scratch on Windows surfaced defects in the ReXGlue SDK. The
+first three are the same family — **consuming the SDK from source, exactly the
+way `rexglue init` documents, was broken**:
 
-1. **`MSPACK_DIR` apontando para uma árvore de symlinks.** No Windows o git
-   materializa symlink como arquivo de texto de 29 bytes por padrão, e o clang
-   tenta compilá-lo como código C. Quebra em qualquer clone Windows.
+1. **`MSPACK_DIR` pointing at a symlink tree.** On Windows git materializes a
+   symlink as a 29-byte text file by default, and clang tries to compile it as C.
+   Breaks on any Windows clone.
 
-2. **Presets gerados sem `-march`.** As rotinas de byte-swap do SDK usam
-   intrínsecos SSSE3 — necessárias porque o Xbox 360 é big-endian e o PC não.
-   O SDK declara essa ISA só nos presets dele; os presets que o `rexglue init`
-   gera não tinham nada, então as bibliotecas internas compilavam sem SSSE3 e
-   falhavam.
+2. **Generated presets without `-march`.** The SDK's byte-swap routines use SSSE3
+   intrinsics — needed because the Xbox 360 is big-endian and the PC is not. The
+   SDK declares that ISA only in its own presets; the presets `rexglue init`
+   generates had nothing, so the internal libraries compiled without SSSE3 and
+   failed.
 
-3. **`imgui` linkado como PRIVATE, mas exposto em header público.**
-   `rex/ui/style.h` faz `#include <imgui.h>` e `rex/rex_app.h` puxa ele em
-   cascata — ou seja, todo projeto gerado pelo template precisa desse include,
-   mas ele não propagava.
+3. **`imgui` linked PRIVATE but exposed in a public header.** `rex/ui/style.h`
+   includes `<imgui.h>` and `rex/rex_app.h` pulls it in transitively — so every
+   generated project needs that include, but it did not propagate.
 
-Os outros dois apareceram depois, já com o jogo rodando:
+The rest appeared later, with the game already running:
 
-4. **Aviso enganoso no codegen.** `emitBranchWithBoundsCheck` avisava sobre
-   qualquer branch que saísse da função, mas thunks de despacho fazem isso o
-   tempo todo, por construção. O aviso escondia os casos que de fato importam.
-   A correção está escrita, mas **ainda não validada** — precisa de um build
-   separado para não arriscar a versão jogável.
+4. **Misleading codegen warning.** `emitBranchWithBoundsCheck` warned about any
+   branch leaving the function, but dispatch thunks do that constantly by
+   construction. The warning hid the cases that actually matter. The fix is
+   written but **not yet validated**.
 
-5. **`user_data_root` do TOML não tem efeito.** Em `ui/rex_app.cpp` os caminhos
-   são resolvidos a partir dos cvars **antes** de `LoadConfig()` ler o arquivo,
-   então o valor posto no TOML chega tarde demais e a pasta padrão prevalece —
-   em silêncio, criando um segundo conjunto de saves em `Documentos`. O
-   contorno é passar o caminho na linha de comando, que é o que o launcher faz.
+5. **`user_data_root` from the TOML has no effect.** In `ui/rex_app.cpp` paths are
+   resolved from the cvars **before** `LoadConfig()` reads the file, so a value
+   placed in the TOML arrives too late and the default folder wins — silently,
+   creating a second set of saves.
 
-6. **A versão do SDK é lida do repositório errado.** `rex_resolve_version`
-   usa `CMAKE_SOURCE_DIR` como padrão, que aponta para a raiz do projeto
-   **consumidor** quando o SDK entra por `add_subdirectory`. O `git describe`
-   roda então no repositório de quem usa o SDK, e uma tag de release lá em cima
-   é comparada com o piso de versão do SDK. Criar a tag `v1.0.0` neste projeto
-   foi o bastante para o configure abortar com *"floor version (0.10) is behind
-   tag version (1.0)"*. A correção é uma linha: passar
-   `SOURCE_DIR ${REXGLUE_ROOT}` na chamada.
+6. **The SDK version is read from the wrong repository.** `rex_resolve_version`
+   defaults to `CMAKE_SOURCE_DIR`, which points at the **consuming** project's
+   root when the SDK enters through `add_subdirectory`. Creating a `v1.0.0` tag
+   here was enough to make configure abort with *"floor version (0.10) is behind
+   tag version (1.0)"*.
 
-As correções dos três primeiros, mais esta última, estão prontas para virar PR.
-
----
-
-## Roteiro
-
-- [x] Traduzir o XEX para C++
-- [x] Compilar um executável nativo
-- [x] Fazer o runtime subir e carregar o jogo
-- [x] Passar dos inicializadores estáticos iniciais
-- [x] Chegar na primeira imagem renderizada
-- [x] Chegar ao gameplay jogável
-- [x] Manifesto sem avisos no codegen (66 entradas verificadas)
-- [x] Saves de carreira funcionando e num lugar só
-- [x] Launcher: da ISO até o jogo aberto, sem exigir ferramentas
-- [x] Release pronta para jogar
-- [ ] Texturas do tronco na criação de lutador
-- [ ] Melhorar o detector de funções órfãs (seguir fluxo de controle)
-- [ ] Resolver as jump tables (`[[switch_tables]]`) — 1.067 já extraídas
-- [ ] Validar a correção nº 4 do SDK num build separado
-- [ ] Abrir os PRs no ReXGlue SDK
-
-**Android**
-
-- [x] Traduzir e compilar o jogo inteiro para ARM64
-- [x] Runtime, Vulkan e memória do guest de pé no aparelho
-- [x] Montar a ISO direto, sem extrair
-- [x] Tela cheia e orientação travada em paisagem
-- [x] Controles do Xbox 360 na tela
-- [x] Menu com seletor de arquivos para a ISO
-- [ ] Aquecer o cache de shader antes da primeira partida
-- [ ] Release do APK
+7. **String cvars written to TOML without escaping.** `SaveConfig` serialized a
+   string as `name = "value"` with no escaping. A Windows path made the whole file
+   unparseable — `\U` is a Unicode escape — so every setting silently reverted on
+   the next start, including `gpu_plugin`, and the game came up with no GPU
+   emulation at all: a black screen, with nothing in the log pointing at the
+   cause. Opening the settings screen once was enough to trigger it.
 
 ---
 
-## Sobre
+## Roadmap
 
-Sou brasileiro, 23 anos, estudante de engenharia de software.
-Isso aqui é projeto de tempo livre — nasceu da curiosidade de entender como uma
-recompilação estática funciona de verdade, e virou isso.
+- [x] Translate the XEX to C++
+- [x] Build a native executable
+- [x] Bring the runtime up and load the game
+- [x] Get past the early static initializers
+- [x] Reach the first rendered frame
+- [x] Reach playable gameplay
+- [x] Warning-free manifest (67 verified entries)
+- [x] Career saves working, in one place
+- [x] Launcher: from ISO to running game, with no tools required
+- [x] Release ready to play
+- [x] Native render interface integrated, owning the final image
+- [ ] Locate the pixel shader microcode
+- [ ] Decode the vertex declaration and texture object layout
+- [ ] Native render targets in place of EDRAM emulation
+- [ ] Native scene rendering
+- [ ] Torso textures in Create-a-Fighter
+- [ ] Improve the orphan-function detector (follow control flow)
+- [ ] Resolve the jump tables (`[[switch_tables]]`) — 1,067 already extracted
+- [ ] Open the remaining SDK pull requests
 
-Não tenho pressa nem promessa de entrega. Vou publicando o que for saindo.
+---
 
-Se você entende de PowerPC, de engenharia reversa de Xbox 360, ou só quer
-acompanhar, issues e discussões são bem-vindas.
+## About
 
-Agora que o código está aberto, dá para contribuir de verdade. O
-[CONTRIBUTING](CONTRIBUTING.md) diz onde a ajuda faz mais diferença — e,
-principalmente, **o que eu já tentei e não deu certo**, para ninguém repetir.
-As ferramentas de análise estão em [`tools/`](tools/), cada uma explicada.
+I am Brazilian, 23, a software engineering student. This is a free-time project —
+it started from curiosity about how a static recompilation actually works, and
+turned into this.
+
+No deadlines and no promises. I publish what comes out.
+
+If you know PowerPC, Xbox 360 reverse engineering, or just want to follow along,
+issues and discussions are welcome. [CONTRIBUTING](CONTRIBUTING.md) says where
+help makes the most difference — and, more importantly, **what I already tried
+that did not work**, so nobody repeats it. The analysis tools are in
+[`tools/`](tools/), each one explained.
 
 ---
 
 ## Legal
 
-Projeto de pesquisa e engenharia reversa para interoperabilidade.
+A research and reverse-engineering project for interoperability.
 
-O que a release distribui é o executável do console **traduzido** para C++ e
-compilado como programa nativo — obra derivada, produzida por este projeto.
-Nenhum dado do jogo vai junto: arte, áudio, vídeo, modelos e atributos dos
-lutadores continuam vindo do disco que você comprou, e sem ele o programa nem
-abre.
+What the release distributes is the console executable **translated** to C++ and
+compiled as a native program — a derived work, produced by this project. No game
+data ships with it: art, audio, video, models and fighter attributes still come
+from the disc you bought, and without it the program does not even start.
 
-UFC Undisputed 3 é marca e propriedade da THQ / Yuke's / seus respectivos
-detentores, sem nenhuma relação com este projeto.
+UFC Undisputed 3 is a trademark and property of THQ / Yuke's / their respective
+owners, with no relationship to this project.
