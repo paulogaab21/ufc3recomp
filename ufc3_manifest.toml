@@ -67,7 +67,7 @@ includes = []
 
 # --- Adjustor thunks de heranca multipla (addi r3,r3,N ; b alvo) ---
 # Ajustam o ponteiro 'this' para o subobjeto certo e desviam. Oito bytes
-# exatos, alcancados so por vtable. Achados por work/acha_thunks.py, que
+# exatos, alcancados so por vtable. Achados por work/find_thunks.py, que
 # exige origem E destino r3 -- sem isso o padrao pega epilogo de funcao.
 0x8255D968 = { size = 0x8 }
 0x8255D980 = { size = 0x8 }

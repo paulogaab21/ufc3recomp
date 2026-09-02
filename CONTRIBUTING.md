@@ -45,7 +45,7 @@ terminator, and it has a contiguous body that closes.
 
 ### 2. Apply the jump tables
 
-`tools/acha_switch.py` already extracted **1,067 tables**, with address, index
+`tools/find_switch_tables.py` already extracted **1,067 tables**, with address, index
 register and labels validated against the code range. They have never been
 applied to the manifest. Applying them and measuring the effect is well-bounded
 work.

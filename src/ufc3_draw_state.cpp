@@ -44,7 +44,7 @@
 // durante uma cena com geometria, sao sinais de que algum deslocamento esta
 // errado -- e e' melhor saber disso pelo log do que por uma tela preta.
 
-#include "ufc3_estado_desenho.h"
+#include "ufc3_draw_state.h"
 
 #include <atomic>
 #include <cstring>

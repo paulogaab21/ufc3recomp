@@ -10,7 +10,7 @@
 // shadows inside the device itself. Reading them there is what connects one end
 // to the other.
 //
-// See ufc3_estado_desenho.cpp for the offsets and where they came from.
+// See ufc3_draw_state.cpp for the offsets and where they came from.
 
 namespace ufc3 {
 namespace estado_desenho {

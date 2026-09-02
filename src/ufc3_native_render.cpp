@@ -37,7 +37,7 @@
 // chooses is the STRENGTH (ufc3_nitidez, zero included), not whether the
 // renderer takes part -- the same way nobody chooses whether emulation draws.
 
-#include "ufc3_render_nativo.h"
+#include "ufc3_native_render.h"
 
 #include <algorithm>
 #include <cstdint>

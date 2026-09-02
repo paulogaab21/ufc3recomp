@@ -102,7 +102,7 @@ for a in sorted(mn):
 print("DESPACHANTES DE VTABLE nao registrados: %d" % len(achados))
 with io.open(OUT, "w", encoding="utf-8") as f:
     f.write("# Despachantes de vtable (lwz/lwz/mtctr/bctr), 16 bytes fixos.\n")
-    f.write("# Gerado por work/acha_despachantes.py -- tamanho fixo, sem estimativa.\n")
+    f.write("# Gerado por work/find_dispatchers.py -- tamanho fixo, sem estimativa.\n")
     for a, off in achados:
         f.write("0x%08X = { size = 0x10 }\n" % a)
 print("escrito: %s" % OUT)

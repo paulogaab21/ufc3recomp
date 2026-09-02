@@ -53,10 +53,10 @@ walking the flow graph and adds it to the manifest. It recognises adjustor thunk
 the walked path covers less than 70% of the range — a sign the end was estimated
 wrong.
 
-**`varre_regiao.py`** — sweeps a range applying the four tests a candidate
+**`sweep_region.py`** — sweeps a range applying the four tests a candidate
 function must pass: not already known, not the target of any direct branch,
 preceded by a terminator, and with a contiguous body that closes. With
-`--aplicar`, it writes to the manifest.
+`--apply`, it writes to the manifest.
 
 **`find_orphans.py`** and **`find_orphans2.py`** — bulk detectors. They
 disassemble the 17 MB of code, cross-reference what the recompiler knows, and
@@ -64,21 +64,21 @@ look for valid code nobody calls directly. The first stops at the first
 terminator, which produces false positives on `switch` blocks; the second follows
 control flow. **Treat the output as a candidate list, never as truth.**
 
-**`acha_thunks.py`** — looks for multiple-inheritance adjustor thunks. It requires
+**`find_thunks.py`** — looks for multiple-inheritance adjustor thunks. It requires
 `addi r3,r3,N` (the `this` pointer only) and that the address is not a branch
 target. That second filter is essential: without it I picked up 16 internal
 blocks of existing functions, and linking broke with `use of undeclared label`.
 
-**`acha_despachantes.py`** — looks for frameless vtable dispatchers: the pattern
+**`find_dispatchers.py`** — looks for frameless vtable dispatchers: the pattern
 `lwz r,0(r3)` / `lwz r,N(r)` / `mtctr` / `bctr` in 16 bytes, with the same
 branch-target filter. Of 41 candidates, only 1 survived it.
 
-**`acha_switch.py`** — extracts jump tables. It finds the index register from
+**`find_switch_tables.py`** — extracts jump tables. It finds the index register from
 `rlwinm rD,rIndex,2,0,29` and reads the labels big-endian from `base.bin`,
 validating that they all land inside the code range. It extracted 1,067 tables,
 **not yet applied to the manifest**.
 
-**`filtra_manifesto.py`** — prunes the manifest, removing entries that do not hold
+**`prune_manifest.py`** — prunes the manifest, removing entries that do not hold
 up.
 
 ## Automatic loops
@@ -87,7 +87,7 @@ up.
 and disassembles the region with source and destination marked. With `-Corrigir`
 it removes entries on its own in the cut-function case.
 
-**`loop-faltantes.ps1`** — a closed loop for the *missing function* case: run,
+**`loop-missing.ps1`** — a closed loop for the *missing function* case: run,
 take the address, compute the end, add it, regenerate, rebuild, repeat. It only
 acts on that case; any other error stops it and hands the result back for human
 analysis. Adding a missing function is the safe direction — with the right size,
@@ -99,7 +99,7 @@ which has a mechanical fix.
 
 ## Measurement
 
-**`medir.ps1`** — measures CPU, GPU, threads and resolve rate at the same time,
+**`measure.ps1`** — measures CPU, GPU, threads and resolve rate at the same time,
 which is what separates the hypotheses:
 
 ```

@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------
-#  loop-faltantes.ps1 - ciclo automatico para funcoes FALTANDO
+#  loop-missing.ps1 - ciclo automatico para funcoes FALTANDO
 #
 #  Roda o jogo, pega o endereco do "Call to invalid or unregistered function",
 #  calcula o fim pelo grafo de fluxo (work\add_missing.py), acrescenta ao
@@ -12,7 +12,7 @@
 #  o automatico.
 #
 #  Uso:  $env:UFC3_GAME = "<pasta do disco extraido>"
-#        .\work\loop-faltantes.ps1 -Voltas 10
+#        .\work\loop-missing.ps1 -Voltas 10
 # ---------------------------------------------------------------------------
 param(
     [int]$Voltas = 10,

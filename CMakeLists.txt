@@ -12,10 +12,10 @@ include(generated/rexglue.cmake)
 
 set(UFC3_SOURCES
     src/main.cpp
-    src/ufc3_render_nativo.cpp
-    src/ufc3_captura_desenho.cpp
-    src/ufc3_estado_desenho.cpp
-    src/ufc3_extrai_cena.cpp
+    src/ufc3_native_render.cpp
+    src/ufc3_draw_capture.cpp
+    src/ufc3_draw_state.cpp
+    src/ufc3_scene_extract.cpp
 )
 
 if(WIN32)
@@ -43,7 +43,7 @@ endif()
 rexglue_setup_target(ufc3 GPU_PLUGINS xenos)
 
 if(WIN32)
-    # MiniDumpWriteDump, usado por src/captura_falhas.h para gravar o despejo
+    # MiniDumpWriteDump, usado por src/crash_capture.h para gravar o despejo
     # quando o jogo morre.
     target_link_libraries(ufc3 PRIVATE Dbghelp)
 endif()

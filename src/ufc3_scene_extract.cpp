@@ -39,7 +39,7 @@
 // de quads, o renderizador nativo vai precisar converter para triangulos, e a
 // conversao muda a contagem de indices.
 
-#include "ufc3_extrai_cena.h"
+#include "ufc3_scene_extract.h"
 
 #include <atomic>
 #include <cstdio>

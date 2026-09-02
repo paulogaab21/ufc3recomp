@@ -11,7 +11,7 @@
 // things emulation cannot give, because emulation is faithful to what the
 // console did.
 //
-// See ufc3_extrai_cena.cpp.
+// See ufc3_scene_extract.cpp.
 
 namespace ufc3 {
 namespace extrai_cena {

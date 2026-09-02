@@ -1,5 +1,5 @@
 # =============================================================================
-#  medir.ps1 - procura o gargalo, medindo todas as camadas ao mesmo tempo.
+#  measure.ps1 - procura o gargalo, medindo todas as camadas ao mesmo tempo.
 #
 #  A pergunta que isso responde: quem esta segurando o jogo?
 #
@@ -8,7 +8,7 @@
 #    Textura/s alto            -> cache pequeno, recarga constante
 #    Resolve/s < 60            -> a simulacao nao acompanha os vblanks
 #
-#  Uso:  .\work\medir.ps1 -Segundos 45 -Rotulo "2x2"
+#  Uso:  .\work\measure.ps1 -Segundos 45 -Rotulo "2x2"
 # =============================================================================
 param(
     [int]$Segundos = 45,

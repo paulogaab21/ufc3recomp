@@ -1,6 +1,6 @@
 #pragma once
 
-// Capture of the game's draw stream. See ufc3_captura_desenho.cpp for the
+// Capture of the game's draw stream. See ufc3_draw_capture.cpp for the
 // rationale and for how the hook replaces the codegen-emitted function.
 
 namespace ufc3 {

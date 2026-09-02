@@ -20,8 +20,8 @@ lado a lado e um crash so revela um deles por vez. Em vez de esperar N
 execucoes, cobre a fileira inteira -- mas com a mesma barra de evidencia,
 nao por atacado.
 
-Uso:  python work\\varre_regiao.py 0x8258A200 0x8258A400
-      python work\\varre_regiao.py 0x8258A200 0x8258A400 --aplicar
+Uso:  python work\\sweep_region.py 0x8258A200 0x8258A400
+      python work\\sweep_region.py 0x8258A200 0x8258A400 --apply
 """
 import io, re, sys, json, subprocess, os
 
@@ -37,9 +37,9 @@ FECHA = {"blr", "bctr", "rfi", "b", "ba"}
 
 def main():
     if len(sys.argv) < 3:
-        raise SystemExit("uso: python work\\varre_regiao.py 0xINI 0xFIM [--aplicar]")
+        raise SystemExit("uso: python work\\sweep_region.py 0xINI 0xFIM [--apply]")
     ini, fim = int(sys.argv[1], 16), int(sys.argv[2], 16)
-    aplicar = "--aplicar" in sys.argv
+    apply_it = "--apply" in sys.argv
 
     mn = {}
     alvos = set()
@@ -86,8 +86,8 @@ def main():
     for addr, size, s in achados:
         print("  " + s)
 
-    if not aplicar:
-        print("\n(rode com --aplicar para acrescentar ao manifesto)")
+    if not apply_it:
+        print("\n(rode com --apply para acrescentar ao manifesto)")
         return
 
     with io.open(MAN, "a", encoding="utf-8") as f:

@@ -131,7 +131,7 @@ for i, a in enumerate(ordem):
 
 print("JUMP TABLES com destinos validos: %d" % len(achados))
 with io.open(OUT, "w", encoding="utf-8") as f:
-    f.write("# Jump tables extraidas por work/acha_switch.py.\n")
+    f.write("# Jump tables extraidas por work/find_switch_tables.py.\n")
     f.write("# Base e contagem vem do proprio codigo; destinos lidos do binario\n")
     f.write("# e conferidos contra a faixa de codigo. Sem estimativa.\n")
     for bctr, tab, dest, reg in achados:

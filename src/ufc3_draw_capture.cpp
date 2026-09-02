@@ -33,9 +33,9 @@
 // `mul * n + add` from the table at 0x82003670. The constants below came from
 // that table, read out of the binary.
 
-#include "ufc3_captura_desenho.h"
-#include "ufc3_estado_desenho.h"
-#include "ufc3_extrai_cena.h"
+#include "ufc3_draw_capture.h"
+#include "ufc3_draw_state.h"
+#include "ufc3_scene_extract.h"
 
 #include <atomic>
 #include <cstdint>

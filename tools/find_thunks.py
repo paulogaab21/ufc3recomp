@@ -79,7 +79,7 @@ for a in sorted(mn):
 print("ADJUSTOR THUNKS nao registrados: %d" % len(achados))
 with io.open(OUT, "w", encoding="utf-8") as f:
     f.write("# Adjustor thunks (addi + b, 8 bytes) que o rexglue nao descobriu.\n")
-    f.write("# Gerado por work/acha_thunks.py -- tamanho fixo, sem estimativa.\n")
+    f.write("# Gerado por work/find_thunks.py -- tamanho fixo, sem estimativa.\n")
     for a in achados:
         f.write("0x%08X = { size = 0x8 }\n" % a)
 print("escrito: %s" % OUT)

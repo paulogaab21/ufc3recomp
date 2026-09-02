@@ -6,8 +6,8 @@
 
 #include <rex/rex_app.h>
 
-#include "captura_falhas.h"
-#include "ufc3_render_nativo.h"
+#include "crash_capture.h"
+#include "ufc3_native_render.h"
 
 class Ufc3App : public rex::ReXApp {
  public:

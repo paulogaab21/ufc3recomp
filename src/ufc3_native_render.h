@@ -1,6 +1,6 @@
 #pragma once
 
-// UFC 3 native renderer. See ufc3_render_nativo.cpp for why native drawing
+// UFC 3 native renderer. See ufc3_native_render.cpp for why native drawing
 // exists and how it coexists with emulation.
 
 namespace ufc3 {
