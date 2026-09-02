@@ -1,40 +1,41 @@
-// ufc3 - renderizador nativo
+// ufc3 - native renderer
 //
-// O caminho normal desenha por emulacao: o jogo escreve pacotes PM4 no anel de
-// comandos, o processador de comandos os interpreta e reconstroi cada quadro
-// traduzindo estado do Xenos. Funciona, mas paga o preco de emular uma GPU
-// inteira para chegar a uma imagem que a placa moderna saberia desenhar direto.
+// The normal path draws through emulation: the game writes PM4 packets into the
+// command ring, the command processor interprets them and rebuilds every frame
+// by translating Xenos state. It works, but it pays the cost of emulating a
+// whole GPU to reach an image a modern card could have drawn directly.
 //
-// O SDK expoe dois pontos de entrada, e a diferenca entre eles decide o que da
-// para fazer hoje:
+// The SDK exposes two entry points, and the difference between them decides what
+// is achievable today:
 //
-//   renderizador     Chamado ANTES do caminho emulado montar a imagem. Assumir
-//                    o quadro aqui significa desenhar a cena inteira lendo as
-//                    estruturas do jogo na memoria do guest -- e ainda nao
-//                    sabemos ler todas. Enquanto nao soubermos, cede.
+//   renderer        Called BEFORE the emulated path builds the image. Taking the
+//                   frame here means drawing the whole scene by reading the
+//                   game's structures out of guest memory -- and we cannot read
+//                   all of them yet. Until we can, it yields.
 //
-//   pos-processador  Chamado DEPOIS, com o quadro pronto na mao. Aqui o desenho
-//                    nativo faz trabalho de verdade em TODO quadro, e o
-//                    resultado aparece na tela.
+//   post-processor  Called AFTER, with the finished frame in hand. Here native
+//                   drawing does real work on EVERY frame, and the result shows
+//                   up on screen.
 //
-// E' pelo segundo que o renderizador nativo ja vale a pena. Ele faz duas coisas:
+// It is through the second that the native renderer already earns its place. It
+// does two things:
 //
-//   nitidez   O jogo desenha a 1280x720 e a imagem sobe para a resolucao do
-//             monitor. Ampliar assim amacia tudo. Uma nitidez adaptativa ao
-//             contraste recupera a definicao onde ha detalhe e deixa em paz as
-//             areas lisas, que e' onde um "sharpen" comum cria auréola.
+//   sharpening  The game draws at 1280x720 and the image is scaled up to the
+//               display. Scaling like that softens everything. Contrast-adaptive
+//               sharpening recovers definition where there is detail and leaves
+//               flat areas alone, which is where a plain sharpen creates halos.
 //
-//   desfoque  Fundo do menu de configuracoes, para o texto ficar legivel sobre
-//             qualquer cena.
+//   blur        Backdrop for the settings menu, so the text stays readable over
+//               any scene.
 //
-// Ambos passam pelo mesmo esqueleto: um triangulo de tela cheia, duas passadas
-// e um alvo intermediario -- ler e escrever a mesma textura na mesma passada
-// nao e' possivel.
+// Both go through the same skeleton: a full-screen triangle, two passes and an
+// intermediate target -- reading and writing the same texture in one pass is not
+// possible.
 //
-// Nao ha chave para desligar o caminho nativo. Ele nao e' um efeito opcional
-// sobreposto ao jogo: e' por onde a imagem final passa. O que o jogador escolhe
-// e' a INTENSIDADE (ufc3_nitidez, zero inclusive), nao se o renderizador
-// participa -- do mesmo jeito que ninguem escolhe se a emulacao desenha.
+// There is no switch to turn the native path off. It is not an optional effect
+// layered on the game: it is where the final image goes through. What the player
+// chooses is the STRENGTH (ufc3_nitidez, zero included), not whether the
+// renderer takes part -- the same way nobody chooses whether emulation draws.
 
 #include "ufc3_render_nativo.h"
 
@@ -46,22 +47,22 @@
 #include <rex/graphics/native_rhi.h>
 #include <rex/logging.h>
 
-REXCVAR_DEFINE_INT32(ufc3_nitidez, 55, "Video/Renderizador nativo",
-                     "Nitidez adaptativa sobre a imagem final, em porcentagem. O jogo "
-                     "desenha a 720p e a ampliacao amacia; isto recupera a definicao. "
-                     "0 desliga.")
+REXCVAR_DEFINE_INT32(ufc3_nitidez, 55, "Video/Native renderer",
+                     "Contrast-adaptive sharpening over the final image, as a percentage. "
+                     "The game draws at 720p and scaling softens it; this recovers the "
+                     "definition. 0 turns it off.")
     .range(0, 100);
 
-REXCVAR_DEFINE_BOOL(ufc3_render_nativo_teste, false, "Diagnostico",
-                    "Pinta a saida de uma cor solida pelo caminho nativo. So para "
-                    "verificar que o gancho, a RHI e a apresentacao estao de pe.");
+REXCVAR_DEFINE_BOOL(ufc3_render_nativo_teste, false, "Diagnostics",
+                    "Paints the output a solid colour through the native path. Only to "
+                    "verify that the hook, the RHI and presentation are all standing.");
 
 REXCVAR_DEFINE_BOOL(ufc3_menu_desfoque, true, "Video/Interface",
-                    "Desfoca e escurece o jogo por tras do menu de configuracoes, "
-                    "para o texto ficar legivel sobre qualquer cena.");
+                    "Blurs and darkens the game behind the settings menu, so the text "
+                    "stays readable over any scene.");
 
 REXCVAR_DEFINE_INT32(ufc3_menu_desfoque_forca, 100, "Video/Interface",
-                     "Intensidade do desfoque do menu, em porcentagem.")
+                     "Strength of the menu blur, as a percentage.")
     .range(0, 300);
 
 namespace ufc3 {

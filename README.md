@@ -50,6 +50,14 @@ game advances **one simulation step per vblank**. At 144 Hz the simulation runs
 2.4x faster than on console: the image is smooth, but the game runs fast. Raising
 it further would not be an improvement — it would be the game in fast-forward.
 
+That coupling is not something this project can remove. It lives inside the
+game's own code, compiled into the XEX in 2011; the runtime only decides *when*
+the vblank fires. What has been fixed is the cadence: with vsync off the guest
+vblank used to run at a fixed 1000 Hz, which made the game run about 16x too
+fast, and catch-up after a hitch was unbounded, so the simulation jumped forward
+instead of resuming. Both are handled now — but the game still advances one step
+per vblank, and that is why the rest of this section matters.
+
 The same mechanism has a second consequence. A saturated GPU does **not** lower
 your frame rate here; it lowers the **speed of the game**. That is why render
 supersampling is locked at 1x: measured on an RTX 3060 Ti during a fight, 1x

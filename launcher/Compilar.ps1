@@ -20,7 +20,7 @@ if (-not (Test-Path $csc)) { throw "csc.exe nao encontrado em $net" }
 
 # recursos embutidos: nome-do-arquivo,nome-logico (o codigo pede pelo logico)
 $recursos = @(
-    'Interface.xaml', 'art.jpg', 'qrcode.jpg',
+    'Interface.xaml', 'art.jpg',
     'FiraSans-Regular.ttf', 'FiraSansCondensed-Regular.ttf', 'FiraSansCondensed-Bold.ttf'
 )
 foreach ($r in $recursos) {

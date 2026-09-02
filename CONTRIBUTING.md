@@ -1,99 +1,120 @@
-# Contribuindo
+# Contributing
 
-Se você chegou aqui querendo ajudar: obrigado. Este documento diz onde a ajuda
-faz mais diferença, e o que eu já tentei e não deu certo — para você não gastar
-tempo repetindo.
+If you came here wanting to help: thank you. This document says where help makes
+the most difference, and what I already tried that did not work — so you do not
+spend time repeating it.
 
-## Antes de tudo
+## Before anything else
 
-Você precisa do seu próprio disco de UFC Undisputed 3. Nada do jogo está neste
-repositório, e **pull request que traga qualquer arquivo do disco será
-recusado** — `.xex`, `.iso`, o C++ gerado, texturas, áudio, save. O
-`.gitignore` já barra os casos óbvios, mas confira antes de abrir.
+You need your own copy of UFC Undisputed 3. Nothing from the game is in this
+repository, and **a pull request carrying any file from the disc will be
+rejected** — `.xex`, `.iso`, the generated C++, textures, audio, saves. The
+`.gitignore` already blocks the obvious cases, but check before opening one.
 
-Para montar o ambiente, veja *Compilando por conta própria* no
-[README](README.md). As ferramentas de análise estão em
-[`tools/`](tools/README.md), com um documento explicando cada uma.
+To set up the environment, see *Building from source* in the [README](README.md).
+The analysis tools are in [`tools/`](tools/README.md), with a document explaining
+each one.
 
-## O problema central
+## The core problem
 
-Não é gráfico, nem áudio, nem desempenho. É **descobrir onde cada função começa
-e termina** dentro do executável do console.
+It is not graphics, audio, or performance. It is **finding where each function
+begins and ends** inside the console executable.
 
-O recompilador acha funções seguindo chamadas (`bl`) e reconhecendo prólogos.
-Existe uma classe que escapa dos dois: funções pequenas demais para terem
-prólogo, alcançadas só indiretamente — por vtable, por adjustor thunk, por
-tabela de construtores estáticos. E, como não mexem na pilha, elas também não
-aparecem no `.pdata`. Das 47.145 funções que o `.pdata` lista, nenhuma cobre
-esses casos.
+The recompiler finds functions by following calls (`bl`) and recognising
+prologues. One class escapes both: functions too small to have a prologue,
+reached only indirectly — through a vtable, an adjustor thunk, or a static
+constructor table. And because they never touch the stack, they do not appear in
+`.pdata` either. Of the 47,145 functions `.pdata` lists, none covers these cases.
 
-Cada uma dessas foi encontrada e conferida à mão. São as 66 entradas do
+Every one of them was found and verified by hand. They are the 67 entries in
 `ufc3_manifest.toml`.
 
-## Onde ajudar, em ordem de valor
+## Where to help, in order of value
 
-### 1. Detecção de fim de função por fluxo de controle
+### 1. End-of-function detection by control flow
 
-`tools/find_orphans.py` para no primeiro terminador, e função real tem vários
-blocos internos — o que gera falso positivo em bloco de `switch`.
-`find_orphans2.py` já segue o fluxo, mas ainda erra. Acertar isso é
-provavelmente a contribuição mais valiosa possível aqui: destrava tudo o mais.
+`tools/find_orphans.py` stops at the first terminator, and a real function has
+several internal blocks — which produces false positives on `switch` blocks.
+`find_orphans2.py` already follows the flow, but still gets it wrong. Getting
+this right is probably the most valuable contribution possible here: it unblocks
+everything else.
 
-Um candidato só é aceitável se passar nos quatro testes: não ser função
-conhecida, não ser alvo de nenhum branch direto, vir depois de um terminador, e
-ter corpo contíguo que fecha.
+A candidate is only acceptable if it passes all four tests: it is not an already
+known function, it is not the target of any direct branch, it comes after a
+terminator, and it has a contiguous body that closes.
 
-### 2. Aplicar as jump tables
+### 2. Apply the jump tables
 
-`tools/acha_switch.py` já extraiu **1.067 tabelas**, com endereço, registrador
-de índice e rótulos validados na faixa de código. Elas nunca foram aplicadas ao
-manifesto. Aplicar e medir o efeito é trabalho bem delimitado.
+`tools/acha_switch.py` already extracted **1,067 tables**, with address, index
+register and labels validated against the code range. They have never been
+applied to the manifest. Applying them and measuring the effect is well-bounded
+work.
 
-### 3. Texturas do tronco na criação de lutador
+### 3. Torso textures in Create-a-Fighter
 
-Bug aberto e reproduzível. O que já foi descartado: não é formato exótico — o
-log não mostra nenhum `k_DXN`, `k_DXT3A` ou `k_CTX1`, só formatos bem
-suportados. Suspeita atual é o caminho de composição por render-to-texture que
-o jogo usa para tatuagens e logos.
+An open, reproducible bug. What has already been ruled out: it is not an exotic
+format — the log shows no `k_DXN`, `k_DXT3A` or `k_CTX1`, only well-supported
+ones. The current suspicion is the render-to-texture composition path the game
+uses for tattoos and logos.
 
-### 4. Validar a correção nº 4 do SDK
+### 4. Native renderer
 
-Está escrita e compila, mas **nunca foi validada**. Precisa de um diretório de
-build separado — não vale arriscar a versão jogável.
+The long-term goal is drawing the game directly through D3D12 by reading the
+game's own structures, instead of emulating the console GPU. The foundation is
+in place and the final image already goes through it, but the scene does not yet.
 
-## O que já tentei e não funcionou
+What is missing, in order: the pixel shader microcode field, the vertex
+declaration, the texture object layout, native render targets in place of EDRAM
+emulation, and then scene and material assembly.
 
-Vale ler antes de propor.
+Two things are already settled and save a lot of work: the SDK's Xenos shader
+translator **can be reused**, so the game's shading does not need to be ported by
+hand, and the vertex shader microcode has been located inside the game's
+`D3DDevice`.
 
-**Manifesto na força bruta.** Gerei 4.751 entradas automáticas: 2.919 falhas
-latentes. Reduzi para 1.874. Enquanto isso, 8 entradas conferidas à mão davam
-zero avisos. **Quantidade não é progresso aqui** — cada entrada errada trunca
-uma função que funcionava.
+### 5. Validate SDK fix #4
 
-**Despachantes de vtable em lote.** 41 candidatos, link quebrado com `use of
-undeclared label`: eram alvos de branch, isto é, blocos internos de funções
-existentes. Com o filtro de alvo de branch, só 1 sobreviveu. O mesmo erro me
-custou 16 thunks falsos antes de eu aplicar o filtro aos dois detectores.
+It is written and compiles, but has **never been validated**. It needs a separate
+build directory — it is not worth risking the playable build.
 
-**Escala não-quadrada de renderização.** 2x1 para ganhar nitidez com metade do
-custo: corrompe as texturas dos personagens. Testado também com
-`draw_resolution_scaled_texture_offsets = false`; continua corrompendo. Os dois
-eixos precisam andar juntos.
+## What I already tried that did not work
 
-**Aumentar a taxa de atualização.** Não deixa o jogo mais fluido: o vblank do
-guest sai de `video_mode_refresh_rate` e o jogo avança um passo de simulação
-por vblank. A 144 Hz ele roda 2,4× mais rápido. Pelo mesmo motivo, saturar a
-GPU derruba a **velocidade**, não os fps.
+Worth reading before proposing.
 
-## Como propor uma mudança no manifesto
+**Brute-forcing the manifest.** I generated 4,751 automatic entries: 2,919 latent
+failures. I got it down to 1,874. Meanwhile, 8 hand-verified entries produced
+zero warnings. **Quantity is not progress here** — every wrong entry truncates a
+function that used to work.
 
-Diga, para cada entrada:
+**Batch vtable dispatchers.** 41 candidates, link broken with `use of undeclared
+label`: they were branch targets, meaning internal blocks of existing functions.
+With a branch-target filter, only 1 survived. The same mistake cost me 16 false
+thunks before I applied the filter to both detectors.
 
-1. o endereço e o tamanho;
-2. como você chegou nesse fim — o caminho pelo grafo de fluxo;
-3. por que não é alvo de branch direto;
-4. o que muda no jogo, medido: avisos do codegen antes e depois, e até onde ele
-   roda.
+**Non-square render scaling.** 2x1, to gain sharpness at half the cost: it
+corrupts character textures. Also tested with
+`draw_resolution_scaled_texture_offsets = false`; still corrupts. Both axes have
+to move together.
 
-Entrada sem justificativa não entra, mesmo que pareça certa. Já perdi tempo
-demais com palpite bem-intencionado — inclusive o meu.
+**Raising the refresh rate.** It does not make the game smoother: the guest vblank
+comes from `video_mode_refresh_rate` and the game advances one simulation step
+per vblank. At 144 Hz it runs 2.4x faster. For the same reason, saturating the
+GPU lowers the game's **speed**, not the frame rate.
+
+**Unlocking render supersampling.** Same trap, found the expensive way. Letting
+players pick 2x dropped a fight from 60 to 35 fps — and worse, a `2x` saved by an
+older version came back to life on its own when the lock was removed, so the game
+got slower after an update without anyone choosing anything. It is locked at 1x.
+
+## How to propose a manifest change
+
+For each entry, say:
+
+1. the address and the size;
+2. how you arrived at that end — the path through the flow graph;
+3. why it is not the target of a direct branch;
+4. what changes in the game, measured: codegen warnings before and after, and how
+   far it runs.
+
+An entry without justification does not go in, even if it looks right. I have
+already lost too much time to well-meaning guesses — including my own.

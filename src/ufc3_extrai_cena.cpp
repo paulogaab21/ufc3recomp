@@ -51,9 +51,9 @@
 #include <rex/filesystem.h>
 #include <rex/logging.h>
 
-REXCVAR_DEFINE_INT32(ufc3_extrair_cena, 0, "Diagnostico",
-                     "Despeja a descricao das proximas N chamadas de desenho num arquivo, "
-                     "para estudo fora do jogo. 0 desliga. Sugestao: 200.")
+REXCVAR_DEFINE_INT32(ufc3_extrair_cena, 0, "Diagnostics",
+                     "Dumps the description of the next N draw calls to a file, for study "
+                     "outside the game. 0 turns it off. Suggested: 200.")
     .range(0, 20000);
 
 namespace ufc3 {

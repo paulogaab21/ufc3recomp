@@ -363,7 +363,6 @@
               <Button x:Name="BtnJogar"       Content="JOGAR"            Style="{StaticResource BtnMenu}" Opacity="0"/>
               <Button x:Name="BtnConfig"      Content="CONFIGURAÇÕES"    Style="{StaticResource BtnMenu}" Opacity="0"/>
               <Button x:Name="BtnReconstruir" Content="RECONSTRUIR"      Style="{StaticResource BtnMenu}" Opacity="0"/>
-              <Button x:Name="BtnApoiar"      Content="APOIAR O PROJETO" Style="{StaticResource BtnMenu}" Opacity="0"/>
             </StackPanel>
           </StackPanel>
 
@@ -419,8 +418,6 @@
                                    To="1" BeginTime="0:0:0.23" Duration="0:0:0.30"/>
                   <DoubleAnimation Storyboard.TargetName="BtnReconstruir" Storyboard.TargetProperty="Opacity"
                                    To="1" BeginTime="0:0:0.30" Duration="0:0:0.30"/>
-                  <DoubleAnimation Storyboard.TargetName="BtnApoiar" Storyboard.TargetProperty="Opacity"
-                                   To="1" BeginTime="0:0:0.37" Duration="0:0:0.30"/>
                   <DoubleAnimation Storyboard.TargetName="An5" Storyboard.TargetProperty="Opacity"
                                    To="1" BeginTime="0:0:0.46" Duration="0:0:0.34"/>
                 </Storyboard>
@@ -606,66 +603,6 @@
         </Grid>
 
         <!-- ================= APOIAR ================= -->
-        <Grid x:Name="PainelApoiar" Grid.Row="1" Margin="84,2,84,24" Visibility="Collapsed">
-          <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-          </Grid.RowDefinitions>
-
-          <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="*"/>
-              <ColumnDefinition Width="52"/>
-              <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-
-            <StackPanel Grid.Column="0" VerticalAlignment="Center">
-              <TextBlock Text="CONTRIBUA" Style="{StaticResource Sobrancelha}"/>
-              <TextBlock Text="Apoie o ufc3Recomp" Foreground="#F5F6F8" FontSize="38"
-                         FontFamily="{DynamicResource FonteCondNegrito}" Margin="-2,2,0,0"/>
-              <Rectangle Height="3" Width="52" Fill="{StaticResource Realce}" RadiusX="1.5" RadiusY="1.5"
-                         HorizontalAlignment="Left" Margin="0,16,0,0"/>
-
-              <TextBlock Foreground="{StaticResource TextoFraco}" FontSize="13.5" TextWrapping="Wrap"
-                         LineHeight="21" Margin="0,20,0,0"
-                         Text="Este projeto é feito por uma pessoa só, no tempo livre, e vai continuar aberto e gratuito para todo mundo."/>
-              <TextBlock Foreground="{StaticResource TextoFraco}" FontSize="13.5" TextWrapping="Wrap"
-                         LineHeight="21" Margin="0,12,0,0"
-                         Text="Traduzir o executável do Xbox 360 para C++ é um trabalho longo: cada função que o jogo usa precisa ser encontrada e conferida à mão, uma por uma."/>
-              <TextBlock Foreground="{StaticResource Texto}" FontSize="16" TextWrapping="Wrap" Margin="0,22,0,0"
-                         FontFamily="{DynamicResource FonteCondNegrito}" FontWeight="Bold"
-                         Text="Se o ufc3Recomp te ajudou, contribua com qualquer valor para o desenvolvimento continuar."/>
-              <TextBlock Foreground="{StaticResource TextoTenue}" FontSize="12" TextWrapping="Wrap" Margin="0,10,0,0"
-                         Text="Não existe valor mínimo — o que você puder ajuda. Nada no projeto fica bloqueado atrás de doação."/>
-            </StackPanel>
-
-            <StackPanel Grid.Column="2" VerticalAlignment="Center">
-              <Border Background="#FFFFFF" CornerRadius="8" Padding="15" HorizontalAlignment="Center">
-                <Border.Effect>
-                  <DropShadowEffect BlurRadius="26" ShadowDepth="5" Direction="270" Opacity="0.55"/>
-                </Border.Effect>
-                <Image x:Name="ImgQr" Width="336" Height="336"
-                       RenderOptions.BitmapScalingMode="HighQuality"/>
-              </Border>
-              <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,0">
-                <Border Background="#191D23" BorderBrush="#3A4048" BorderThickness="1"
-                        CornerRadius="3" Padding="11,4">
-                  <TextBlock Text="PIX" Foreground="{StaticResource Texto}" FontSize="12"
-                             FontFamily="{DynamicResource FonteCondNegrito}"/>
-                </Border>
-                <TextBlock Text="Aponte a câmera do seu banco" Foreground="{StaticResource TextoFraco}"
-                           FontSize="12.5" VerticalAlignment="Center" Margin="10,0,0,0"/>
-              </StackPanel>
-            </StackPanel>
-          </Grid>
-
-          <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
-            <TextBlock Style="{StaticResource Rotulo}" VerticalAlignment="Center" Margin="0,0,16,0"
-                       Foreground="{StaticResource TextoTenue}" Text="Obrigado por jogar."/>
-            <Button x:Name="BtnVoltarApoiar" Content="VOLTAR"
-                    Style="{StaticResource BtnPrim}" Width="168" Height="38"/>
-          </StackPanel>
-        </Grid>
       </Grid>
     </Grid>
   </Border>

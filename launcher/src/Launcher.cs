@@ -668,7 +668,6 @@ internal sealed class Janela {
 
     void Montar() {
         CarregarImagem("ImgFundo", "art.jpg");
-        CarregarImagem("ImgQr", "qrcode.jpg");
 
         var cbIdioma = (ComboBox)Achar("CbIdioma");
         foreach (var s in Idiomas) cbIdioma.Items.Add(s);
@@ -709,8 +708,6 @@ internal sealed class Janela {
         ((Button)Achar("BtnConfig")).Click += (a, b) => Mostrar("PainelConfig");
         ((Button)Achar("BtnVoltar")).Click += (a, b) => { UIParaConfig(); Salvar(); Mostrar("PainelPrincipal"); };
         ((Button)Achar("BtnReconstruir")).Click += (a, b) => Mostrar("PainelSetup");
-        ((Button)Achar("BtnApoiar")).Click += (a, b) => Mostrar("PainelApoiar");
-        ((Button)Achar("BtnVoltarApoiar")).Click += (a, b) => Mostrar("PainelPrincipal");
         ((Button)Achar("BtnSair")).Click += (a, b) => Close();
         ((Button)Achar("BtnEscolherIso")).Click += (a, b) => EscolherArquivo();
         ((Button)Achar("BtnEscolherPasta")).Click += (a, b) => EscolherPasta();
@@ -784,7 +781,7 @@ internal sealed class Janela {
     }
 
     void Mostrar(string qual) {
-        foreach (var p in new[] { "PainelSetup", "PainelPrincipal", "PainelConfig", "PainelApoiar" }) {
+        foreach (var p in new[] { "PainelSetup", "PainelPrincipal", "PainelConfig" }) {
             var g = Achar(p) as UIElement;
             if (g != null) g.Visibility = p == qual ? Visibility.Visible : Visibility.Collapsed;
         }

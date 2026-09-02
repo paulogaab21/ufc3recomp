@@ -1,112 +1,114 @@
-# Ferramentas de análise
+# Analysis tools
 
-O trabalho difícil desta recompilação não é gráfico nem de áudio: é descobrir
-onde cada função começa e termina dentro do executável do console. Estas são as
-ferramentas que usei para isso.
+The hard work in this recompilation is not graphics or audio: it is finding where
+each function begins and ends inside the console executable. These are the tools
+I used for that.
 
-Nenhuma delas é mágica. Todas partem do executável desmontado e do que o
-recompilador já sabe, e devolvem **candidatos** — a decisão final sempre foi
-minha, uma por uma. Foi justamente tentar automatizar essa decisão que deu
-errado: uma vez gerei 4.751 entradas automáticas no manifesto e colhi 2.919
-falhas latentes, enquanto 8 entradas conferidas à mão davam zero avisos.
+None of them is magic. They all start from the disassembled executable and from
+what the recompiler already knows, and they return **candidates** — the final
+call was always mine, one at a time. Trying to automate that decision is exactly
+what went wrong: I once generated 4,751 automatic manifest entries and harvested
+2,919 latent failures, while 8 hand-verified entries produced zero warnings.
 
-## Configuração
+## Configuration
 
-Nada aqui tem caminho fixo. Três variáveis de ambiente controlam tudo:
+Nothing here has a hardcoded path. Three environment variables control
+everything:
 
-| Variável | O que é | Padrão |
+| Variable | What it is | Default |
 |---|---|---|
-| `UFC3_ROOT` | raiz do projeto | a pasta que contém `tools/` |
-| `UFC3_GAME` | pasta do disco extraído | — obrigatória para rodar o jogo |
-| `REXSDK_SRC` | fonte do ReXGlue SDK | — necessária para o objdump de PowerPC |
+| `UFC3_ROOT` | project root | the folder containing `tools/` |
+| `UFC3_GAME` | extracted disc folder | — required to run the game |
+| `REXSDK_SRC` | ReXGlue SDK source | — needed for the PowerPC objdump |
 
 ```powershell
-$env:UFC3_GAME  = "D:\UFC3_extraido"
+$env:UFC3_GAME  = "D:\UFC3_extracted"
 $env:REXSDK_SRC = "C:\dev\rexglue-sdk"
 ```
 
-Alguns scripts esperam encontrar em `work/` o desmontado (`code.dis`) e o
-basefile (`base.bin`), que saem do seu próprio disco e por isso não estão neste
-repositório.
+Some scripts expect to find the disassembly (`code.dis`) and the basefile
+(`base.bin`) in `work/`. Those come from your own disc and are therefore not in
+this repository.
 
-## Os três tipos de erro, e por que importam
+## The three kinds of failure, and why they matter
 
-Antes das ferramentas, o mapa. O runtime falha de três jeitos, e **dois deles
-pedem correções opostas**:
+Before the tools, the map. The runtime fails three ways, and **two of them call
+for opposite fixes**:
 
-| Mensagem | O que significa | O que fazer |
+| Message | What it means | What to do |
 |---|---|---|
-| `Call to invalid or unregistered function at 0xA` | a função em `0xA` não existe | **acrescentar** ao manifesto |
-| `Unresolved branch from 0xA to 0xB` | a função que contém `0xA` foi cortada cedo demais | **remover** entradas na região |
-| `Unresolved call from 0xA to 0xB` | idem | idem |
+| `Call to invalid or unregistered function at 0xA` | the function at `0xA` does not exist | **add** it to the manifest |
+| `Unresolved branch from 0xA to 0xB` | the function containing `0xA` was cut short | **remove** entries in that region |
+| `Unresolved call from 0xA to 0xB` | same | same |
 
-Distinguir os dois é olhar se existe entrada no manifesto naquela região.
-Confundir os dois é gastar horas indo na direção errada — foi o que me aconteceu.
+Telling them apart is a matter of checking whether a manifest entry exists in
+that region. Confusing them means hours spent going the wrong way — which is what
+happened to me.
 
-## Encontrar funções que faltam
+## Finding missing functions
 
-**`add_missing.py`** — dado o endereço de um crash, calcula o fim da função
-percorrendo o grafo de fluxo e acrescenta ao manifesto. Reconhece adjustor thunk
-(`addi rX,rX,N` seguido de `b alvo`, 8 bytes) e recusa corpos esparsos, em que o
-caminho percorrido cobre menos de 70% do intervalo — sinal de que o fim foi
-estimado errado.
+**`add_missing.py`** — given a crash address, computes the end of the function by
+walking the flow graph and adds it to the manifest. It recognises adjustor thunks
+(`addi rX,rX,N` followed by `b target`, 8 bytes) and rejects sparse bodies, where
+the walked path covers less than 70% of the range — a sign the end was estimated
+wrong.
 
-**`varre_regiao.py`** — varre um intervalo aplicando os quatro testes que uma
-função candidata precisa passar: não ser conhecida, não ser alvo de nenhum
-branch direto, vir depois de um terminador, e ter corpo contíguo que fecha.
-Com `--aplicar`, grava no manifesto.
+**`varre_regiao.py`** — sweeps a range applying the four tests a candidate
+function must pass: not already known, not the target of any direct branch,
+preceded by a terminator, and with a contiguous body that closes. With
+`--aplicar`, it writes to the manifest.
 
-**`find_orphans.py`** e **`find_orphans2.py`** — detectores em massa. Desmontam
-os 17 MB de código, cruzam com o que o recompilador conhece e procuram código
-válido que ninguém chama diretamente. O primeiro para no primeiro terminador,
-o que gera falso positivo em bloco de `switch`; o segundo segue o fluxo de
-controle. **Trate a saída como lista de candidatos, nunca como verdade.**
+**`find_orphans.py`** and **`find_orphans2.py`** — bulk detectors. They
+disassemble the 17 MB of code, cross-reference what the recompiler knows, and
+look for valid code nobody calls directly. The first stops at the first
+terminator, which produces false positives on `switch` blocks; the second follows
+control flow. **Treat the output as a candidate list, never as truth.**
 
-**`acha_thunks.py`** — procura adjustor thunks de herança múltipla. Exige
-`addi r3,r3,N` (só o ponteiro `this`) e que o endereço não seja alvo de branch.
-Esse segundo filtro é essencial: sem ele eu peguei 16 blocos internos de funções
-existentes, e o link quebrou com `use of undeclared label`.
+**`acha_thunks.py`** — looks for multiple-inheritance adjustor thunks. It requires
+`addi r3,r3,N` (the `this` pointer only) and that the address is not a branch
+target. That second filter is essential: without it I picked up 16 internal
+blocks of existing functions, and linking broke with `use of undeclared label`.
 
-**`acha_despachantes.py`** — procura despachantes de vtable frameless: o padrão
-`lwz r,0(r3)` / `lwz r,N(r)` / `mtctr` / `bctr` em 16 bytes, com o mesmo filtro
-de alvo de branch. De 41 candidatos, só 1 sobreviveu ao filtro.
+**`acha_despachantes.py`** — looks for frameless vtable dispatchers: the pattern
+`lwz r,0(r3)` / `lwz r,N(r)` / `mtctr` / `bctr` in 16 bytes, with the same
+branch-target filter. Of 41 candidates, only 1 survived it.
 
-**`acha_switch.py`** — extrai jump tables. Acha o registrador de índice pelo
-`rlwinm rD,rIndex,2,0,29` e lê os rótulos em big-endian do `base.bin`,
-validando que todos caem na faixa de código. Extraiu 1.067 tabelas, **ainda não
-aplicadas ao manifesto**.
+**`acha_switch.py`** — extracts jump tables. It finds the index register from
+`rlwinm rD,rIndex,2,0,29` and reads the labels big-endian from `base.bin`,
+validating that they all land inside the code range. It extracted 1,067 tables,
+**not yet applied to the manifest**.
 
-**`filtra_manifesto.py`** — poda o manifesto, removendo entradas que não se
-sustentam.
+**`filtra_manifesto.py`** — prunes the manifest, removing entries that do not hold
+up.
 
-## Ciclos automáticos
+## Automatic loops
 
-**`crash-loop.ps1`** — roda o jogo, classifica a falha nos tipos acima,
-desmonta a região com origem e destino marcados. Com `-Corrigir`, remove
-sozinho no caso de função cortada.
+**`crash-loop.ps1`** — runs the game, classifies the failure into the kinds above,
+and disassembles the region with source and destination marked. With `-Corrigir`
+it removes entries on its own in the cut-function case.
 
-**`loop-faltantes.ps1`** — ciclo fechado para o caso *função faltando*: roda,
-pega o endereço, calcula o fim, acrescenta, regera, recompila, repete. Só age
-nesse caso; qualquer outro erro ele para e devolve para análise humana.
-Acrescentar função faltante é a direção segura — com o tamanho certo, não
-trunca nada. Remover ou redimensionar mexe em código que já funciona, e isso
-não vai para o automático.
+**`loop-faltantes.ps1`** — a closed loop for the *missing function* case: run,
+take the address, compute the end, add it, regenerate, rebuild, repeat. It only
+acts on that case; any other error stops it and hands the result back for human
+analysis. Adding a missing function is the safe direction — with the right size,
+it truncates nothing. Removing or resizing touches code that already works, and
+that does not go into automation.
 
-**`auto-loop.ps1`** — o espelho: só age no caso *função cortada*, que tem
-correção mecânica.
+**`auto-loop.ps1`** — the mirror image: it only acts on the *cut function* case,
+which has a mechanical fix.
 
-## Medição
+## Measurement
 
-**`medir.ps1`** — mede CPU, GPU, threads e taxa de resolve ao mesmo tempo, que é
-o que separa as hipóteses:
+**`medir.ps1`** — measures CPU, GPU, threads and resolve rate at the same time,
+which is what separates the hypotheses:
 
 ```
-GPU alta + CPU baixa      -> gargalo na GPU
-GPU baixa + 1 thread 100% -> gargalo no código recompilado
-Textura/s alto            -> cache pequeno, recarga constante
-Resolve/s < 60            -> a simulação não acompanha os vblanks
+GPU high + CPU low        -> GPU-bound
+GPU low + 1 thread at 100% -> bound in the recompiled code
+Textures/s high           -> cache too small, constant reloading
+Resolves/s < 60           -> the simulation is not keeping up with vblanks
 ```
 
-A última linha é a mais importante e a menos óbvia: neste motor o jogo avança
-um passo de simulação por vblank, então saturar a GPU **não derruba os fps —
-derruba a velocidade do jogo**.
+That last line is the most important and the least obvious: in this engine the
+game advances one simulation step per vblank, so saturating the GPU **does not
+lower the frame rate — it lowers the speed of the game**.

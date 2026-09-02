@@ -1,21 +1,21 @@
 #pragma once
 
-// Renderizador nativo do ufc3. Ver ufc3_render_nativo.cpp para o porque do
-// desenho nativo e como ele convive com a emulacao.
+// UFC 3 native renderer. See ufc3_render_nativo.cpp for why native drawing
+// exists and how it coexists with emulation.
 
 namespace ufc3 {
 namespace render_nativo {
 
-// Registra os dois callbacks no SDK. Chamar uma vez, na subida do app, antes do
-// primeiro quadro. Registrar por si nao muda nada: enquanto o renderizador
-// ceder todos os quadros, o jogo desenha por emulacao como antes.
+// Registers both SDK callbacks. Call once at startup, before the first frame.
+// Registering by itself changes nothing: while the renderer yields every frame,
+// the game draws through emulation exactly as before.
 void Registrar();
 
-// Avisa que o menu de configuracoes abriu ou fechou. O fundo desfocado
-// acompanha esse estado com um desvanecimento.
+// Tells the renderer the settings menu opened or closed. The blurred backdrop
+// follows that state with a fade.
 void AoAbrirFecharMenu(bool aberto);
 
-// Avanca o desvanecimento. Chamar uma vez por quadro, com o tempo decorrido.
+// Advances the fade. Call once per frame, with the elapsed time.
 void AvancarQuadro(float segundos);
 
 }  // namespace render_nativo

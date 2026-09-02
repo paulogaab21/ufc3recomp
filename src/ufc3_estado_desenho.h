@@ -2,48 +2,48 @@
 
 #include <cstdint>
 
-// Estado de desenho do jogo, lido direto do D3DDevice na memoria do guest.
+// Draw state, read straight out of the game's D3DDevice in guest memory.
 //
-// Este e o alicerce do renderizador nativo: o tradutor de shader do SDK produz
-// um DXBC que espera a ABI do Xenos -- constantes float, booleanas e as fetch
-// constants -- e o jogo mantem exatamente essas coisas em sombras dentro do
-// proprio device. Ler dali e' o que liga uma ponta na outra.
+// This is the foundation of the native renderer: the SDK's shader translator
+// produces DXBC that expects the Xenos ABI -- float constants, boolean
+// constants and the fetch constants -- and the game keeps exactly those in
+// shadows inside the device itself. Reading them there is what connects one end
+// to the other.
 //
-// Ver ufc3_estado_desenho.cpp para os deslocamentos e de onde vieram.
+// See ufc3_estado_desenho.cpp for the offsets and where they came from.
 
 namespace ufc3 {
 namespace estado_desenho {
 
-// Uma leitura do estado no instante de um desenho. Enderecos sao do guest.
+// A reading of the state at the moment of a draw. Addresses are guest-side.
 struct Instantaneo {
   uint32_t device = 0;
 
-  // Sombras das constantes, prontas para virar constant buffer.
+  // Constant shadows, ready to become a constant buffer.
   uint32_t const_vs = 0;      // 256 vec4
   uint32_t const_ps = 0;      // 256 vec4
   uint32_t const_bool = 0;
   uint32_t fetch_const = 0;   // 32 slots x 6 dwords
 
-  // Mascaras de "sujo": dizem o que mudou desde o ultimo envio.
+  // Dirty masks: they say what changed since the last submission.
   uint64_t sujo_vs = 0;
   uint64_t sujo_ps = 0;
   uint64_t sujo_fetch = 0;
 
-  // Buffer de indices em vigor.
-  uint32_t obj_indices = 0;      // objeto do jogo
-  uint32_t indices_base = 0;     // endereco dos dados no guest
+  // Index buffer currently bound.
+  uint32_t obj_indices = 0;      // the game's object
+  uint32_t indices_base = 0;     // address of the data in guest memory
   bool     indices_32bits = false;
 
   bool valido = false;
 };
 
-// Le o estado a partir do ponteiro do device. `base` e a base da memoria do
-// guest, como o codigo recompilado a recebe.
+// Reads the state from the device pointer. `base` is the base of guest memory,
+// as the recompiled code receives it.
 Instantaneo Ler(uint8_t* base, uint32_t device);
 
-// Confere se o mapa de memoria bate com a realidade e registra o veredito no
-// log, uma unica vez. Chamar de dentro de um gancho de desenho, quando ha
-// device valido em maos.
+// Checks the memory map against reality and logs the verdict, once. Call it
+// from inside a draw hook, where a valid device pointer is in hand.
 void ValidarUmaVez(uint8_t* base, uint32_t device);
 
 }  // namespace estado_desenho

@@ -1,13 +1,13 @@
 #pragma once
 
-// Captura do fluxo de desenho do jogo. Ver ufc3_captura_desenho.cpp para o
-// porque e para como o gancho substitui a funcao do codegen.
+// Capture of the game's draw stream. See ufc3_captura_desenho.cpp for the
+// rationale and for how the hook replaces the codegen-emitted function.
 
 namespace ufc3 {
 namespace captura_desenho {
 
-// Despeja o total acumulado no log. Os ganchos ja resumem periodicamente;
-// isto serve para fechar a conta num momento escolhido.
+// Dumps the running totals to the log. The hooks already summarise
+// periodically; this closes the count at a chosen moment.
 void ResumirAgora();
 
 }  // namespace captura_desenho
