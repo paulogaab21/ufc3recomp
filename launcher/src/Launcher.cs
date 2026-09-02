@@ -152,7 +152,9 @@ internal sealed class Cfg {
     public Preset PresetAtual { get { return Presets[Math.Max(0, Math.Min(2, Qualidade))]; } }
 
     /// Trava em 1 ou 2. Nunca escala nao-quadrada, nunca acima de 2.
-    public int DrawEfetivo { get { return (DrawScale == 2) ? 2 : 1; } }
+    // Sempre 1. Um ufc3.toml de uma versao anterior pode trazer 2 gravado, e
+    // sem esta trava ele voltaria a valer sem passar por nenhuma tela.
+    public int DrawEfetivo { get { return 1; } }
 
     // Escreve o ufc3.toml lido pelo runtime. Chave = nome do cvar.
     // A tela de opcoes dentro do jogo usa este mesmo arquivo.
@@ -196,6 +198,18 @@ internal sealed class Cfg {
         s.AppendLine("# E peculiaridade dele, nao erro do emulador -- sem isto as texturas");
         s.AppendLine("# afetadas sao descartadas e a cena fica incompleta.");
         s.AppendLine("gpu_allow_invalid_fetch_constants = true");
+        s.AppendLine();
+        s.AppendLine("# Leitura de volta do resolve de render-to-texture.");
+        s.AppendLine("#");
+        s.AppendLine("# A pele do lutador na tela de criacao nao e' uma textura pronta: o jogo");
+        s.AppendLine("# a monta desenhando camadas num alvo de render e depois lendo o");
+        s.AppendLine("# resultado de volta para a memoria, para us\u00e1-la como textura. Com o");
+        s.AppendLine("# padrao \"none\" essa leitura nao acontece, e o que volta e' lixo -- e' o");
+        s.AppendLine("# tronco quebrado que aparece no Criar Lutador.");
+        s.AppendLine("#");
+        s.AppendLine("# \"some\" copia so quando o cache erra, que e' a variante barata; \"full\"");
+        s.AppendLine("# copia sempre e sincroniza, corrigindo mais casos e custando bem mais.");
+        s.AppendLine("readback_resolve = \"some\"");
         s.AppendLine();
         s.AppendLine("# --- Idioma / regiao ---");
         s.AppendLine("user_language = " + Idioma);
@@ -539,9 +553,20 @@ internal sealed class Janela {
         foreach (var s in Idiomas) cbIdioma.Items.Add(s);
         var cbRes = (ComboBox)Achar("CbResolucao");
         foreach (var s in new[] { "720p", "1080p", "1440p", "4k" }) cbRes.Items.Add(s);
+        // A partir daqui o launcher so oferece 1x.
+        //
+        // O 2x parecia uma escolha de qualidade e nao era: nesta recompilacao a
+        // simulacao avanca um passo por vblank, entao quando a GPU nao fecha o
+        // quadro a tempo o jogo nao perde quadros -- ele fica em camara lenta.
+        // Quem escolhia 2x achava que ganhava nitidez e ganhava um jogo mais
+        // devagar, sem nada na tela explicando o porque.
+        //
+        // Uma opcao que so tem um jeito certo de ser usada nao e' opcao. Fica a
+        // caixa, desabilitada, mostrando a resolucao em que o jogo desenha --
+        // que continua sendo informacao util.
         var cbDraw = (ComboBox)Achar("CbDraw");
         cbDraw.Items.Add("1x  —  1280x720 (nativo do console)");
-        cbDraw.Items.Add("2x  —  2560x1440 (2K real)");
+        cbDraw.IsEnabled = false;
         cbDraw.SelectionChanged += (a, b) => AtualizarDicaDraw();
 
         var cbQual = (ComboBox)Achar("CbQualidade");
@@ -652,7 +677,7 @@ internal sealed class Janela {
         ((CheckBox)Achar("ChkTelaCheia")).IsChecked = _cfg.TelaCheia;
         ((CheckBox)Achar("ChkVSync")).IsChecked = _cfg.VSync;
         ((TextBox)Achar("TxtHz")).Text = _cfg.TaxaHz.ToString(CultureInfo.InvariantCulture);
-        ((ComboBox)Achar("CbDraw")).SelectedIndex = (_cfg.DrawScale == 2) ? 1 : 0;
+        ((ComboBox)Achar("CbDraw")).SelectedIndex = 0;
         ((ComboBox)Achar("CbQualidade")).SelectedIndex = Math.Max(0, Math.Min(2, _cfg.Qualidade));
         AtualizarDicaDraw();
         AtualizarDicaQualidade();
@@ -670,7 +695,7 @@ internal sealed class Janela {
         _cfg.TelaCheia = ((CheckBox)Achar("ChkTelaCheia")).IsChecked == true;
         _cfg.VSync = ((CheckBox)Achar("ChkVSync")).IsChecked == true;
         double hz; if (double.TryParse(((TextBox)Achar("TxtHz")).Text, NumberStyles.Any, ci, out hz)) _cfg.TaxaHz = hz;
-        _cfg.DrawScale = (((ComboBox)Achar("CbDraw")).SelectedIndex == 1) ? 2 : 1;
+        _cfg.DrawScale = 1;
         int q = ((ComboBox)Achar("CbQualidade")).SelectedIndex;
         _cfg.Qualidade = (q >= 0 && q <= 2) ? q : 1;
         _cfg.ShaderAsync = ((CheckBox)Achar("ChkShaderAsync")).IsChecked == true;
@@ -684,9 +709,10 @@ internal sealed class Janela {
         var cb = Achar("CbDraw") as ComboBox;
         var t = Achar("TxtDrawDica") as TextBlock;
         if (cb == null || t == null) return;
-        t.Text = (cb.SelectedIndex == 1)
-            ? "Imagem bem mais nítida, mas quatro vezes o trabalho da GPU. Numa RTX 3060 Ti a placa fica em 98% durante a luta e o jogo passa a rodar em câmera lenta. Use se preferir a imagem, ou se sua placa for mais forte."
-            : "O jogo desenha a 720p e a imagem é ampliada para a resolução da tela. É o nativo do Xbox 360 e mantém a velocidade correta.";
+        t.Text = "O jogo desenha a 720p e a imagem é ampliada para a resolução da tela — " +
+                 "o nativo do Xbox 360. Resoluções maiores foram removidas: elas não " +
+                 "derrubam os quadros por segundo, derrubam a velocidade do jogo, porque a " +
+                 "simulação avança um passo por vblank.";
     }
 
     void AtualizarDicaQualidade() {
