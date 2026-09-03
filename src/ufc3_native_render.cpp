@@ -300,11 +300,20 @@ nrhi::TextureView* VistaDaSaida(nrhi::Device* dispositivo, nrhi::Texture* saida)
     }
   }
   if (g_r.saidas_usadas >= Recursos::kMaxSaidas) {
-    // O rodizio nao deveria passar disso. Se passar, a primeira entrada e
-    // reaproveitada: melhor uma vista recriada de vez em quando do que crescer
-    // sem limite.
-    if (g_r.saida_srv[0]) {
-      dispositivo->DestroyDeferred(g_r.saida_srv[0]);
+    // The presenter's rotation should never exceed this. If it does, start the
+    // cache over -- but release EVERY entry first.
+    //
+    // The first version of this released only entry 0 and then reset the count,
+    // which orphaned the other seven: their views were never destroyed and their
+    // slots were overwritten. Seven descriptors leaked per overflow, quietly,
+    // and the only symptom would be the frame time creeping up over a long
+    // session.
+    for (uint32_t i = 0; i < g_r.saidas_usadas; ++i) {
+      if (g_r.saida_srv[i]) {
+        dispositivo->DestroyDeferred(g_r.saida_srv[i]);
+      }
+      g_r.saida_srv[i] = nullptr;
+      g_r.saida_tex[i] = nullptr;
     }
     g_r.saidas_usadas = 0;
   }

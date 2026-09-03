@@ -17,6 +17,7 @@ set(UFC3_SOURCES
     src/ufc3_draw_state.cpp
     src/ufc3_scene_extract.cpp
     src/ufc3_shader_fetch.cpp
+    src/ufc3_frame_mark.cpp
 )
 
 if(WIN32)
