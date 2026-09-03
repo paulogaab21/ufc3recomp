@@ -47,11 +47,25 @@
 // the next piece of work, and it is why the native renderer still yields every
 // frame.
 //
-// WHY TRANSLATE ONCE PER HASH
+// WHY TRANSLATE ONCE PER HASH, AND WHY THERE IS A LIMIT
 //
 // A scene issues hundreds of draws per frame but uses a handful of distinct
 // shaders. Keying on the microcode hash means the log shows those few, and
 // repeated draws cost one hash lookup instead of a full translation.
+//
+// That is still not enough on its own, and finding out cost a crash. This runs
+// on the game's render thread, and translation is a compiler pass: a 180-dword
+// shader produced 26 KB of DXBC and stalled a frame for 297 ms. The game keeps
+// meeting new shaders as you move through it, so the stalls keep coming -- and
+// a render thread stalled long enough starves the GPU queue until the driver
+// declares a timeout and resets the device. That is exactly what happened:
+// two large translations, a 297 ms frame, and DEVICE_HUNG three seconds later.
+//
+// Hence the limit. It bounds the damage to the first shaders of a session,
+// which is all an inspection pass needs. The real fix, when this stops being a
+// diagnostic and becomes part of drawing, is to translate off the render
+// thread -- which is what the emulated path already does with
+// async_shader_compilation.
 
 #include "ufc3_shader_translate.h"
 
@@ -72,8 +86,16 @@
 
 REXCVAR_DEFINE_BOOL(ufc3_traduzir_shaders, false, "Diagnostics",
                     "Translates the game's shaders to DXBC as they are used, and reports "
-                    "each distinct one. A step toward native scene rendering; it does not "
-                    "change the image.");
+                    "each distinct one. STALLS THE RENDER THREAD -- translation is a "
+                    "compiler pass, and a large shader costs hundreds of milliseconds. "
+                    "For inspection only, never for playing.");
+
+REXCVAR_DEFINE_INT32(ufc3_traduzir_shaders_limite, 64, "Diagnostics",
+                     "How many distinct shaders to translate before stopping. Bounds the "
+                     "stalls: the game keeps finding new shaders as you move through it, "
+                     "and translating every one of them on the render thread eventually "
+                     "starves the GPU queue into a driver timeout.")
+    .range(1, 100000);
 
 namespace ufc3 {
 namespace shader_translate {
@@ -127,6 +149,9 @@ void Traduzir(uint8_t* base, const shader_fetch::Microcodigo& m, const char* rot
   {
     std::lock_guard<std::mutex> trava(g_mutex);
     if (g_vistos.find(hash) != g_vistos.end()) {
+      return;
+    }
+    if (g_vistos.size() >= size_t(REXCVAR_GET(ufc3_traduzir_shaders_limite))) {
       return;
     }
     g_vistos.emplace(hash, false);
