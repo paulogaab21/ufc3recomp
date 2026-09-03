@@ -18,6 +18,9 @@ set(UFC3_SOURCES
     src/ufc3_scene_extract.cpp
     src/ufc3_shader_fetch.cpp
     src/ufc3_frame_mark.cpp
+    # src/ufc3_shader_translate.cpp  -- ver o cabecalho do arquivo: o tradutor
+    # vive no plugin de GPU, entao isto so linka quando o codigo de cena
+    # migrar para la.
 )
 
 if(WIN32)
