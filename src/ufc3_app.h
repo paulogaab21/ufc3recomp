@@ -6,6 +6,8 @@
 
 #include <rex/rex_app.h>
 
+#include <rex/graphics/d3d12/graphics_system.h>
+
 #include "crash_capture.h"
 #include "ufc3_native_render.h"
 
@@ -28,6 +30,19 @@ class Ufc3App : public rex::ReXApp {
   // O renderizador nativo se registra antes do primeiro quadro. Registrar nao
   // muda nada por si: enquanto ele ceder todos os quadros, o jogo desenha por
   // emulacao exatamente como antes.
+  // O sistema de graficos vem daqui, ja construido, em vez de ser procurado
+  // como plugin. O ReXApp so chama LoadGpuPlugin quando config.graphics esta
+  // vazio, entao preencher aqui desliga esse caminho por inteiro.
+  //
+  // A razao nao e desempenho: e' que o tradutor de shader do Xenos, o cache de
+  // textura e a RHI moram dentro do alvo de graficos, e com ele carregado por
+  // dlopen o executavel nao consegue chamar nenhum deles. Com a GPU linkada
+  // estaticamente -- que e como o skate3recomp funciona -- o codigo do jogo
+  // alcanca tudo isso, que e o que o renderizador nativo precisa.
+  void OnPreSetup(rex::RuntimeConfig& config) override {
+    config.graphics = REX_GRAPHICS_BACKEND(rex::graphics::d3d12::D3D12GraphicsSystem);
+  }
+
   void OnPostSetup() override { ufc3::render_nativo::Registrar(); }
 
   // O SDK nao expoe um gancho "uma vez por quadro", mas todo dialogo de ImGui

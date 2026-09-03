@@ -18,9 +18,7 @@ set(UFC3_SOURCES
     src/ufc3_scene_extract.cpp
     src/ufc3_shader_fetch.cpp
     src/ufc3_frame_mark.cpp
-    # src/ufc3_shader_translate.cpp  -- ver o cabecalho do arquivo: o tradutor
-    # vive no plugin de GPU, entao isto so linka quando o codigo de cena
-    # migrar para la.
+    src/ufc3_shader_translate.cpp
 )
 
 if(WIN32)
@@ -45,7 +43,25 @@ else()
     add_executable(ufc3 ${UFC3_SOURCES})
 endif()
 
+# Graficos compilados DENTRO do executavel, no modelo do skate3recomp.
+#
+# O padrao do rexglue 0.10.0 e carregar a GPU como plugin por dlopen. Isso
+# funciona para jogar, mas fecha a porta do renderizador nativo: o tradutor de
+# shader do Xenos, o cache de textura e a RHI vivem todos dentro do plugin, e o
+# runtime que este executavel linka nao carrega nada de graficos. Qualquer
+# tentativa de chamar o tradutor daqui falha no link, com os simbolos
+# indefinidos -- nao importa onde a chamada esteja.
+#
+# O skate3recomp nao teve esse problema porque no 0.8.0 os graficos ja iam
+# compilados no executavel. REXGLUE_GPU_STATIC devolve esse arranjo.
+set(REXGLUE_GPU_STATIC ON CACHE BOOL "" FORCE)
+
 rexglue_setup_target(ufc3 GPU_PLUGINS xenos)
+
+# Com a GPU estatica o executavel linka o alvo direto, e o sistema de graficos
+# passa a ser fornecido pelo proprio app (ver OnPreSetup em ufc3_app.h) em vez
+# de procurado como plugin.
+target_link_libraries(ufc3 PRIVATE rex::gpu-xenos)
 
 if(WIN32)
     # MiniDumpWriteDump, usado por src/crash_capture.h para gravar o despejo

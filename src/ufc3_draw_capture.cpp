@@ -37,6 +37,7 @@
 #include "ufc3_draw_state.h"
 #include "ufc3_scene_extract.h"
 #include "ufc3_shader_fetch.h"
+#include "ufc3_shader_translate.h"
 
 #include <atomic>
 #include <cstdint>
@@ -173,6 +174,7 @@ extern "C" REX_FUNC(sub_82384100) {
   // to check whether the offset map matches reality. It costs one call.
   ufc3::estado_desenho::ValidarUmaVez(base, ctx.r3.u32);
   ufc3::shader_fetch::ValidarUmaVez(base, ctx.r3.u32);
+  ufc3::shader_translate::TraduzirUmaVez(base, ctx.r3.u32);
   ufc3::extrai_cena::Observar(base, ctx.r3.u32, ctx.r4.u32, ctx.r7.u32,
                               int32_t(ctx.r5.u32), ctx.r6.u32, /*indexada=*/true);
   __imp__sub_82384100(ctx, base);
@@ -188,6 +190,7 @@ extern "C" REX_FUNC(sub_823832E8) {
   // both.
   ufc3::estado_desenho::ValidarUmaVez(base, ctx.r3.u32);
   ufc3::shader_fetch::ValidarUmaVez(base, ctx.r3.u32);
+  ufc3::shader_translate::TraduzirUmaVez(base, ctx.r3.u32);
   ufc3::extrai_cena::Observar(base, ctx.r3.u32, ctx.r4.u32, ctx.r6.u32,
                               int32_t(ctx.r5.u32), 0, /*indexada=*/false);
   __imp__sub_823832E8(ctx, base);
